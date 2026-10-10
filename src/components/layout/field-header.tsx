@@ -18,7 +18,7 @@ export function FieldHeader({ fullName }: { fullName: string }) {
           <p className="text-[11px] font-medium uppercase tracking-[.12em] text-slate-400">Campo</p>
         </div>
         <div className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">{initials}</div>
-        <form action="/auth/signout" method="post" method="post">
+        <form action="/auth/signout" method="post">
           <button type="submit" title="Cerrar sesión" aria-label="Cerrar sesión" className="grid size-9 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
             <LogOut className="size-4" strokeWidth={1.5} />
           </button>
@@ -27,3 +27,4 @@ export function FieldHeader({ fullName }: { fullName: string }) {
     </header>
   )
 }
+

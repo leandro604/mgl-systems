@@ -53,7 +53,7 @@ export function FieldSidebar({ companyName, fullName, unreadCount = 0 }: { compa
         })}
       </nav>
 
-      <form action="/auth/signout" method="post" method="post" className="mt-auto border-t border-slate-200 pt-3">
+      <form action="/auth/signout" method="post" className="mt-auto border-t border-slate-200 pt-3">
         <button type="submit" className="flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-950">
           <LogOut className="size-4" strokeWidth={1.5} />
           Cerrar sesión
@@ -62,3 +62,4 @@ export function FieldSidebar({ companyName, fullName, unreadCount = 0 }: { compa
     </aside>
   )
 }
+
