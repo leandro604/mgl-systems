@@ -1,0 +1,7 @@
+MGL Systems 0.8.7
+Tarea 5 — Corrección v1
+
+Corrección TypeScript:
+- Se valida explícitamente projectResult.data antes de leer los umbrales de costo.
+- Evita TS18047 en src/features/budget/server.ts.
+- Sin cambios de esquema ni migraciones adicionales en Supabase.

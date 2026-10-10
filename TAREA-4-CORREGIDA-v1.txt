@@ -1,0 +1,8 @@
+MGL Systems 0.8.4 — Tarea 4 Corregida v1
+
+Correcciones:
+- LocalTask permite stage_id null solo en la capa local/offline, sin debilitar TaskRow remoto.
+- Eliminadas propiedades duplicadas stage_id/version en adaptadores de TaskRow.
+- Eliminados defaults duplicados de umbrales de costo en ProjectRow.
+- Fixture Phase 8 actualizado con stage_id/version actuales.
+- Sin cambios de esquema Supabase.

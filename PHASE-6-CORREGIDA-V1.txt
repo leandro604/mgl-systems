@@ -1,0 +1,13 @@
+MGL Systems — Fase 6 Corregida v1
+Version: 0.6.1
+
+Correccion:
+- El replay aislado de database/phase6-control.sql ya no falla si phase2-sync.sql no fue cargado antes.
+- El permiso de mgl_private.write_sync_receipt(...) se restaura condicionalmente solo cuando la funcion existe.
+- No cambia el esquema ni los datos del Supabase remoto.
+
+Validacion esperada:
+- npm run typecheck
+- npm run test -> 12/12
+- npm run test:schema -> 68/68
+- npm run build

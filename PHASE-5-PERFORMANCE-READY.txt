@@ -1,0 +1,21 @@
+MGL Systems — Fase 5.1 Performance Patch
+
+Implementado:
+- Contexto workspace en 1 RPC RLS-safe.
+- Dedupe por React.cache() en RSC.
+- Contexto de proyecto sin consulta redundante.
+- Consultas de módulos paralelizadas con el contexto.
+- Prefetch en navegación principal y de proyecto.
+- Navegación móvil con next/link.
+- Loading UI inmediato.
+- Service Worker de desarrollo permanece deshabilitado (corrección anterior).
+
+Supabase remoto:
+- Migración 20260924175437_phase5_workspace_context_performance aplicada.
+- get_workspace_context() verificada bajo rol authenticated.
+- EXPLAIN ANALYZE del RPC: ~6 ms de ejecución DB en la verificación realizada.
+- Security Advisor: solo warning preexistente de Leaked Password Protection Disabled.
+
+Validación local en entorno de generación:
+- 105 archivos TS/TSX: 0 diagnósticos de sintaxis (transpileModule).
+- npm install no concluyó por timeout del registro, por lo que typecheck/tests/build completos deben ejecutarse en el equipo del usuario.

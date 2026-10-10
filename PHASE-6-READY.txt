@@ -1,0 +1,4 @@
+MGL Systems · Fase 6
+Presupuesto + centros de costo + avance físico + valorizaciones + control de proyecto.
+Backend remoto aplicado y prueba transaccional completada con ROLLBACK.
+Ejecutar npm run verify en el entorno local antes de cerrar formalmente la fase.

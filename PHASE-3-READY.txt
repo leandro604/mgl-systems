@@ -1,0 +1,15 @@
+MGL Systems — Fase 3
+
+Backend remoto:
+- Migration 20260924054329_phase3_company_onboarding aplicada.
+- Security Advisor: 0 findings después de la migración.
+- Auth users al momento de construir la fase: 0.
+
+Frontend:
+- Auth SSR/PKCE.
+- Onboarding company/admin.
+- Workspace protegido.
+- Dashboard/proyectos/equipo/configuración.
+- Tailwind + shadcn-style + Lucide + Framer Motion.
+
+Validación final de dependencias/build debe ejecutarse en el equipo del usuario con `npm install && npm run verify`.

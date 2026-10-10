@@ -1,0 +1,2228 @@
+@import "tailwindcss" source("../");
+
+
+
+/* ============================================================
+
+   MGL SYSTEMS — GLOBAL UI
+
+   Regla visual 60 / 30 / 10
+
+   ============================================================
+
+
+
+   60% NEUTROS
+
+   - Fondo general
+
+   - Cards
+
+   - Formularios
+
+   - Tablas
+
+   - Sidebar oscuro neutro
+
+
+
+   30% SOPORTE
+
+   - Bordes
+
+   - Tabs
+
+   - Botones secundarios
+
+   - Textos secundarios
+
+   - Superficies suaves
+
+
+
+   10% MARCA / ACCIÓN
+
+   - Azul MGL
+
+   - CTA principal
+
+   - Estado activo
+
+   - Indicadores relevantes
+
+   ============================================================ */
+
+
+
+:root {
+
+  /* ==========================================================
+
+     10% — COLOR PRIMARIO
+
+     ========================================================== */
+
+  --mgl-primary: #2563eb;
+
+  --mgl-primary-hover: #1d4ed8;
+
+  --mgl-primary-active: #1e40af;
+
+  --mgl-primary-soft: #eff6ff;
+
+  --mgl-primary-border: #bfdbfe;
+
+
+
+  /* ==========================================================
+
+     60% — NEUTROS
+
+     ========================================================== */
+
+  --mgl-page: #f8fafc;
+
+  --mgl-surface: #ffffff;
+
+  --mgl-surface-soft: #f8fafc;
+
+
+
+  --mgl-sidebar: #0f172a;
+
+  --mgl-sidebar-deep: #020617;
+
+
+
+  --mgl-text: #0f172a;
+
+  --mgl-text-strong: #111827;
+
+  --mgl-text-secondary: #475569;
+
+  --mgl-text-muted: #64748b;
+
+
+
+  /* ==========================================================
+
+     30% — SOPORTE
+
+     ========================================================== */
+
+  --mgl-support: #f1f5f9;
+
+  --mgl-support-hover: #e2e8f0;
+
+  --mgl-support-strong: #cbd5e1;
+
+
+
+  --mgl-border: #e2e8f0;
+
+  --mgl-border-strong: #cbd5e1;
+
+
+
+  /* ==========================================================
+
+     SEMÁNTICOS
+
+     No cuentan dentro del 10% porque solo comunican estado
+
+     ========================================================== */
+
+  --mgl-success: #16a34a;
+
+  --mgl-success-soft: #f0fdf4;
+
+  --mgl-success-border: #bbf7d0;
+
+
+
+  --mgl-warning: #d97706;
+
+  --mgl-warning-soft: #fffbeb;
+
+  --mgl-warning-border: #fde68a;
+
+
+
+  --mgl-danger: #dc2626;
+
+  --mgl-danger-soft: #fef2f2;
+
+  --mgl-danger-border: #fecaca;
+
+
+
+  --mgl-critical: #991b1b;
+
+  --mgl-critical-soft: #fef2f2;
+
+
+
+  /* ==========================================================
+
+     GEOMETRÍA
+
+     ========================================================== */
+
+  --mgl-radius-sm: 8px;
+
+  --mgl-radius-md: 10px;
+
+  --mgl-radius-lg: 12px;
+
+  --mgl-radius-xl: 14px;
+
+
+
+  --mgl-shadow:
+
+    0 1px 2px rgba(15, 23, 42, 0.04),
+
+    0 1px 3px rgba(15, 23, 42, 0.03);
+
+}
+
+
+
+/* ============================================================
+
+   RESET
+
+   ============================================================ */
+
+
+
+* {
+
+  box-sizing: border-box;
+
+}
+
+
+
+html {
+
+  background: var(--mgl-page);
+
+  color: var(--mgl-text);
+
+}
+
+
+
+body {
+
+  min-height: 100vh;
+
+  margin: 0;
+
+
+
+  background: var(--mgl-page);
+
+  color: var(--mgl-text);
+
+
+
+  font-family:
+
+    Inter,
+
+    ui-sans-serif,
+
+    system-ui,
+
+    -apple-system,
+
+    BlinkMacSystemFont,
+
+    "Segoe UI",
+
+    sans-serif;
+
+
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+
+
+  -webkit-font-smoothing: antialiased;
+
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
+
+}
+
+
+
+::selection {
+
+  background: #dbeafe;
+
+  color: #1e3a8a;
+
+}
+
+
+
+a {
+
+  color: inherit;
+
+  text-decoration: none;
+
+}
+
+
+
+button,
+
+input,
+
+select,
+
+textarea {
+
+  font: inherit;
+
+}
+
+
+
+/* ============================================================
+
+   ÁREA PRINCIPAL — 60%
+
+   ============================================================ */
+
+
+
+main {
+
+  min-height: 100%;
+
+  background: var(--mgl-page) !important;
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+main h1,
+
+main h2,
+
+main h3,
+
+main h4,
+
+main h5,
+
+main h6 {
+
+  color: var(--mgl-text-strong);
+
+}
+
+
+
+main p {
+
+  color: var(--mgl-text-secondary);
+
+}
+
+
+
+/* ============================================================
+
+   SIDEBAR — NEUTRO OSCURO
+
+   ============================================================ */
+
+
+
+aside,
+
+.mgl-sidebar {
+
+  background: var(--mgl-sidebar-deep) !important;
+
+  color: #cbd5e1 !important;
+
+  border-right: 1px solid #1e293b !important;
+
+}
+
+
+
+/* Logo / títulos */
+
+
+
+aside h1,
+
+aside h2,
+
+aside h3,
+
+aside strong,
+
+.mgl-sidebar h1,
+
+.mgl-sidebar h2,
+
+.mgl-sidebar h3,
+
+.mgl-sidebar strong {
+
+  color: #ffffff !important;
+
+}
+
+
+
+aside p,
+
+aside small,
+
+.mgl-sidebar p,
+
+.mgl-sidebar small {
+
+  color: #94a3b8 !important;
+
+}
+
+
+
+/* Links del sidebar */
+
+
+
+aside a,
+
+aside button,
+
+.mgl-sidebar a,
+
+.mgl-sidebar button {
+
+  color: #cbd5e1 !important;
+
+  background: transparent;
+
+  transition:
+
+    background-color 150ms ease,
+
+    color 150ms ease;
+
+}
+
+
+
+aside a svg,
+
+aside button svg,
+
+.mgl-sidebar a svg,
+
+.mgl-sidebar button svg {
+
+  color: #94a3b8 !important;
+
+}
+
+
+
+/* Hover */
+
+
+
+aside a:hover,
+
+aside button:hover,
+
+.mgl-sidebar a:hover,
+
+.mgl-sidebar button:hover {
+
+  background: #0f172a !important;
+
+  color: #ffffff !important;
+
+}
+
+
+
+aside a:hover svg,
+
+aside button:hover svg {
+
+  color: #ffffff !important;
+
+}
+
+
+
+/* Activo = parte del 10% */
+
+
+
+aside a[aria-current="page"],
+
+aside [data-active="true"],
+
+aside .active,
+
+.mgl-sidebar a[aria-current="page"],
+
+.mgl-sidebar [data-active="true"],
+
+.mgl-sidebar .active {
+
+  background: #1e293b !important;
+
+  color: #ffffff !important;
+
+}
+
+
+
+aside a[aria-current="page"] svg,
+
+aside [data-active="true"] svg,
+
+aside .active svg {
+
+  color: #60a5fa !important;
+
+}
+
+
+
+/* ============================================================
+
+   TOPBAR
+
+   ============================================================ */
+
+
+
+header,
+
+.mgl-topbar {
+
+  background: #ffffff !important;
+
+  border-bottom: 1px solid var(--mgl-border) !important;
+
+  color: var(--mgl-text) !important;
+
+  box-shadow: none !important;
+
+}
+
+
+
+header h1,
+
+header h2,
+
+header h3,
+
+header strong {
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+header p,
+
+header small {
+
+  color: var(--mgl-text-muted) !important;
+
+}
+
+
+
+/* ============================================================
+
+   HERO DEL PROYECTO
+
+   Antes estaba demasiado oscuro.
+
+   Ahora se integra al 60% neutro.
+
+   ============================================================ */
+
+
+
+.mgl-project-hero {
+
+  background: #ffffff !important;
+
+  background-image: none !important;
+
+
+
+  color: var(--mgl-text) !important;
+
+
+
+  border: 1px solid var(--mgl-border) !important;
+
+  border-radius: var(--mgl-radius-xl);
+
+
+
+  box-shadow: var(--mgl-shadow) !important;
+
+}
+
+
+
+/* Código */
+
+
+
+.mgl-project-hero .project-code,
+
+.mgl-project-hero [class*="text-blue"] {
+
+  color: var(--mgl-primary) !important;
+
+}
+
+
+
+/* Nombre */
+
+
+
+.mgl-project-hero h1,
+
+.mgl-project-hero h2,
+
+.mgl-project-hero h3 {
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+.mgl-project-hero h1 {
+
+  font-size: 2rem;
+
+  line-height: 1.15;
+
+  font-weight: 650;
+
+  letter-spacing: -0.025em;
+
+}
+
+
+
+/* Descripción */
+
+
+
+.mgl-project-hero p {
+
+  color: var(--mgl-text-muted) !important;
+
+}
+
+
+
+/* Badge del hero */
+
+
+
+.mgl-project-hero .mgl-badge-info {
+
+  background: var(--mgl-primary-soft);
+
+  color: var(--mgl-primary);
+
+  border: 1px solid var(--mgl-primary-border);
+
+}
+
+
+
+/* ============================================================
+
+   FALLBACK:
+
+   cualquier hero antiguo con fondos slate dentro de MAIN
+
+   pasa a superficie clara.
+
+
+
+   Esto NO afecta el sidebar porque solo actúa dentro de main.
+
+   ============================================================ */
+
+
+
+main .bg-slate-950,
+
+main .bg-slate-900,
+
+main .bg-slate-800,
+
+main .bg-slate-700 {
+
+  background: #ffffff !important;
+
+  background-image: none !important;
+
+
+
+  color: var(--mgl-text) !important;
+
+
+
+  border-color: var(--mgl-border) !important;
+
+}
+
+
+
+/* IMPORTANTE:
+
+   Evita que Tailwind mantenga texto blanco/oscuro incorrecto
+
+   después de aclarar el fondo.
+
+*/
+
+
+
+main .bg-slate-950 h1,
+
+main .bg-slate-950 h2,
+
+main .bg-slate-950 h3,
+
+main .bg-slate-900 h1,
+
+main .bg-slate-900 h2,
+
+main .bg-slate-900 h3,
+
+main .bg-slate-800 h1,
+
+main .bg-slate-800 h2,
+
+main .bg-slate-800 h3,
+
+main .bg-slate-700 h1,
+
+main .bg-slate-700 h2,
+
+main .bg-slate-700 h3 {
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+main .bg-slate-950 p,
+
+main .bg-slate-900 p,
+
+main .bg-slate-800 p,
+
+main .bg-slate-700 p {
+
+  color: var(--mgl-text-muted) !important;
+
+}
+
+
+
+/* ============================================================
+
+   TABS DEL PROYECTO
+
+   30% soporte / 10% activo
+
+   ============================================================ */
+
+
+
+.mgl-project-tabs {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+}
+
+
+
+.mgl-project-tabs a,
+
+.mgl-project-tabs button,
+
+main nav a,
+
+main nav button {
+
+  background: #ffffff !important;
+
+  color: #475569 !important;
+
+
+
+  border: 1px solid var(--mgl-border) !important;
+
+  border-radius: 10px;
+
+
+
+  box-shadow: none !important;
+
+}
+
+
+
+/* Hover */
+
+
+
+.mgl-project-tabs a:hover,
+
+.mgl-project-tabs button:hover,
+
+main nav a:hover,
+
+main nav button:hover {
+
+  background: var(--mgl-support) !important;
+
+  color: var(--mgl-text) !important;
+
+  border-color: var(--mgl-border-strong) !important;
+
+}
+
+
+
+/* Activo */
+
+
+
+.mgl-project-tabs a[aria-current="page"],
+
+.mgl-project-tabs [data-active="true"],
+
+main nav a[aria-current="page"],
+
+main nav [data-active="true"] {
+
+  background: var(--mgl-primary-soft) !important;
+
+  color: var(--mgl-primary) !important;
+
+  border-color: var(--mgl-primary-border) !important;
+
+}
+
+
+
+/* Corrige tabs antiguas con fondo slate */
+
+
+
+main nav .bg-slate-700,
+
+main nav .bg-slate-800,
+
+main nav .bg-slate-900,
+
+main nav a.bg-slate-700,
+
+main nav button.bg-slate-700 {
+
+  background: #ffffff !important;
+
+  color: #475569 !important;
+
+}
+
+
+
+/* ============================================================
+
+   CARDS
+
+   ============================================================ */
+
+
+
+.mgl-card,
+
+main article,
+
+main .card {
+
+  background: #ffffff;
+
+  color: var(--mgl-text);
+
+
+
+  border: 1px solid var(--mgl-border);
+
+  border-radius: var(--mgl-radius-lg);
+
+
+
+  box-shadow: var(--mgl-shadow);
+
+}
+
+
+
+.mgl-card h1,
+
+.mgl-card h2,
+
+.mgl-card h3,
+
+.mgl-card h4 {
+
+  color: var(--mgl-text);
+
+}
+
+
+
+.mgl-card p {
+
+  color: var(--mgl-text-secondary);
+
+}
+
+
+
+/* ============================================================
+
+   TARJETAS DE KPIs
+
+   ============================================================ */
+
+
+
+.mgl-kpi-card {
+
+  background: #ffffff;
+
+
+
+  border: 1px solid var(--mgl-border);
+
+  border-radius: var(--mgl-radius-lg);
+
+
+
+  box-shadow: var(--mgl-shadow);
+
+}
+
+
+
+.mgl-kpi-card .mgl-kpi-icon {
+
+  background: var(--mgl-primary-soft);
+
+  color: var(--mgl-primary);
+
+}
+
+
+
+/* ============================================================
+
+   PANEL DEPENDENCIAS
+
+   ============================================================ */
+
+
+
+.mgl-dependencies-panel {
+
+  background: #ffffff !important;
+
+  color: var(--mgl-text) !important;
+
+
+
+  border: 1px solid var(--mgl-border) !important;
+
+  border-radius: var(--mgl-radius-lg);
+
+
+
+  box-shadow: var(--mgl-shadow) !important;
+
+}
+
+
+
+.mgl-dependencies-panel h1,
+
+.mgl-dependencies-panel h2,
+
+.mgl-dependencies-panel h3 {
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+.mgl-dependencies-panel p {
+
+  color: var(--mgl-text-muted) !important;
+
+}
+
+
+
+.mgl-dependencies-panel label {
+
+  color: var(--mgl-text-secondary) !important;
+
+}
+
+
+
+/* ============================================================
+
+   INPUTS
+
+   ============================================================ */
+
+
+
+input,
+
+textarea,
+
+select {
+
+  background: #ffffff !important;
+
+  color: var(--mgl-text) !important;
+
+
+
+  border: 1px solid var(--mgl-border-strong) !important;
+
+  border-radius: var(--mgl-radius-md);
+
+
+
+  outline: none;
+
+
+
+  box-shadow: none !important;
+
+
+
+  transition:
+
+    border-color 150ms ease,
+
+    box-shadow 150ms ease;
+
+}
+
+
+
+input::placeholder,
+
+textarea::placeholder {
+
+  color: #94a3b8 !important;
+
+  opacity: 1;
+
+}
+
+
+
+input:focus,
+
+textarea:focus,
+
+select:focus {
+
+  border-color: var(--mgl-primary) !important;
+
+
+
+  box-shadow:
+
+    0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+
+}
+
+
+
+/* Readonly */
+
+
+
+input[readonly],
+
+textarea[readonly] {
+
+  background: #f8fafc !important;
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+/* Disabled */
+
+
+
+input:disabled,
+
+textarea:disabled,
+
+select:disabled {
+
+  background: #f1f5f9 !important;
+
+  color: #64748b !important;
+
+  border-color: #e2e8f0 !important;
+
+
+
+  opacity: 1 !important;
+
+}
+
+
+
+/* Labels */
+
+
+
+label {
+
+  color: var(--mgl-text) !important;
+
+  font-weight: 500;
+
+}
+
+
+
+/* ============================================================
+
+   BOTONES — 60 / 30 / 10
+
+   ============================================================ */
+
+
+
+button {
+
+  transition:
+
+    background-color 150ms ease,
+
+    color 150ms ease,
+
+    border-color 150ms ease;
+
+
+
+  box-shadow: none !important;
+
+}
+
+
+
+/* Primary = 10% */
+
+
+
+.mgl-button-primary,
+
+button[data-variant="primary"],
+
+a[data-variant="primary"] {
+
+  background: var(--mgl-primary) !important;
+
+  color: #ffffff !important;
+
+
+
+  border: 1px solid var(--mgl-primary) !important;
+
+  border-radius: var(--mgl-radius-md);
+
+}
+
+
+
+.mgl-button-primary:hover,
+
+button[data-variant="primary"]:hover,
+
+a[data-variant="primary"]:hover {
+
+  background: var(--mgl-primary-hover) !important;
+
+  border-color: var(--mgl-primary-hover) !important;
+
+}
+
+
+
+/* Secondary = 30% */
+
+
+
+.mgl-button-secondary {
+
+  background: #ffffff !important;
+
+  color: #334155 !important;
+
+
+
+  border: 1px solid var(--mgl-border-strong) !important;
+
+}
+
+
+
+.mgl-button-secondary:hover {
+
+  background: var(--mgl-support) !important;
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+/* Ghost */
+
+
+
+.mgl-button-ghost {
+
+  background: transparent !important;
+
+  color: #475569 !important;
+
+
+
+  border: 1px solid transparent !important;
+
+}
+
+
+
+.mgl-button-ghost:hover {
+
+  background: var(--mgl-support) !important;
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+/* ============================================================
+
+   MUY IMPORTANTE:
+
+   Corrige los botones grises oscuros que aparecen en tu captura
+
+   dentro del área principal.
+
+
+
+   Ejemplo:
+
+   Gestionar tareas
+
+   Documentación
+
+   Seguridad y SST
+
+   Equipo del proyecto
+
+   etc.
+
+   ============================================================ */
+
+
+
+main button.bg-slate-950,
+
+main button.bg-slate-900,
+
+main button.bg-slate-800,
+
+main button.bg-slate-700,
+
+main a.bg-slate-950,
+
+main a.bg-slate-900,
+
+main a.bg-slate-800,
+
+main a.bg-slate-700 {
+
+  background: #ffffff !important;
+
+  color: #334155 !important;
+
+
+
+  border: 1px solid var(--mgl-border-strong) !important;
+
+
+
+  box-shadow: none !important;
+
+}
+
+
+
+main button.bg-slate-950:hover,
+
+main button.bg-slate-900:hover,
+
+main button.bg-slate-800:hover,
+
+main button.bg-slate-700:hover,
+
+main a.bg-slate-950:hover,
+
+main a.bg-slate-900:hover,
+
+main a.bg-slate-800:hover,
+
+main a.bg-slate-700:hover {
+
+  background: var(--mgl-support) !important;
+
+  color: var(--mgl-text) !important;
+
+}
+
+
+
+/* Botones azules */
+
+
+
+main button.bg-blue-600,
+
+main button.bg-blue-500,
+
+main a.bg-blue-600,
+
+main a.bg-blue-500 {
+
+  background: var(--mgl-primary) !important;
+
+  color: #ffffff !important;
+
+}
+
+
+
+/* ============================================================
+
+   BOTONES DE ACCESO RÁPIDO
+
+   ============================================================ */
+
+
+
+.mgl-quick-action {
+
+  background: #ffffff !important;
+
+  color: #334155 !important;
+
+
+
+  border: 1px solid var(--mgl-border) !important;
+
+  border-radius: var(--mgl-radius-md);
+
+
+
+  box-shadow: none !important;
+
+}
+
+
+
+.mgl-quick-action:hover {
+
+  background: var(--mgl-primary-soft) !important;
+
+  color: var(--mgl-primary) !important;
+
+
+
+  border-color: var(--mgl-primary-border) !important;
+
+}
+
+
+
+.mgl-quick-action svg {
+
+  color: #64748b;
+
+}
+
+
+
+.mgl-quick-action:hover svg {
+
+  color: var(--mgl-primary);
+
+}
+
+
+
+/* ============================================================
+
+   BADGES
+
+   ============================================================ */
+
+
+
+.mgl-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+
+
+  padding: 3px 9px;
+
+
+
+  border-radius: 9999px;
+
+
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+}
+
+
+
+.mgl-badge-neutral {
+
+  background: var(--mgl-support);
+
+  color: #475569;
+
+}
+
+
+
+.mgl-badge-info {
+
+  background: var(--mgl-primary-soft);
+
+  color: var(--mgl-primary);
+
+
+
+  border: 1px solid var(--mgl-primary-border);
+
+}
+
+
+
+.mgl-badge-success {
+
+  background: var(--mgl-success-soft);
+
+  color: #15803d;
+
+
+
+  border: 1px solid var(--mgl-success-border);
+
+}
+
+
+
+.mgl-badge-warning {
+
+  background: var(--mgl-warning-soft);
+
+  color: #b45309;
+
+
+
+  border: 1px solid var(--mgl-warning-border);
+
+}
+
+
+
+.mgl-badge-danger {
+
+  background: var(--mgl-danger-soft);
+
+  color: var(--mgl-danger);
+
+
+
+  border: 1px solid var(--mgl-danger-border);
+
+}
+
+
+
+.mgl-badge-critical {
+
+  background: var(--mgl-critical-soft);
+
+  color: var(--mgl-critical);
+
+}
+
+
+
+/* ============================================================
+
+   CHIPS
+
+   ============================================================ */
+
+
+
+.mgl-chip {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+
+
+  min-height: 30px;
+
+  padding: 4px 10px;
+
+
+
+  background: #ffffff;
+
+
+
+  color: var(--mgl-text-secondary);
+
+
+
+  border: 1px solid var(--mgl-border);
+
+  border-radius: 9999px;
+
+}
+
+
+
+.mgl-chip:hover {
+
+  background: var(--mgl-support);
+
+  color: var(--mgl-text);
+
+}
+
+
+
+.mgl-chip[data-selected="true"] {
+
+  background: var(--mgl-primary-soft);
+
+  color: var(--mgl-primary);
+
+
+
+  border-color: var(--mgl-primary-border);
+
+}
+
+
+
+/* ============================================================
+
+   PROGRESS
+
+   ============================================================ */
+
+
+
+.mgl-progress {
+
+  width: 100%;
+
+  height: 7px;
+
+
+
+  overflow: hidden;
+
+
+
+  background: #e2e8f0;
+
+
+
+  border-radius: 9999px;
+
+}
+
+
+
+.mgl-progress-bar {
+
+  height: 100%;
+
+
+
+  background: var(--mgl-primary);
+
+
+
+  border-radius: inherit;
+
+
+
+  transition: width 200ms ease;
+
+}
+
+
+
+/* ============================================================
+
+   TABLAS
+
+   ============================================================ */
+
+
+
+table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+
+
+
+  color: var(--mgl-text);
+
+  background: #ffffff;
+
+}
+
+
+
+thead {
+
+  background: #f8fafc;
+
+  color: var(--mgl-text-secondary);
+
+}
+
+
+
+th {
+
+  font-weight: 500;
+
+  text-align: left;
+
+}
+
+
+
+th,
+
+td {
+
+  padding: 12px 14px;
+
+
+
+  border-bottom: 1px solid var(--mgl-border);
+
+}
+
+
+
+tbody tr {
+
+  background: #ffffff;
+
+}
+
+
+
+tbody tr:hover {
+
+  background: #f8fafc;
+
+}
+
+
+
+/* No grid vertical */
+
+
+
+table,
+
+th,
+
+td {
+
+  border-left: none;
+
+  border-right: none;
+
+}
+
+
+
+/* ============================================================
+
+   EMPTY STATE
+
+   ============================================================ */
+
+
+
+.mgl-empty-state {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+
+
+  min-height: 220px;
+
+  padding: 32px;
+
+
+
+  background: #ffffff;
+
+
+
+  color: var(--mgl-text-secondary);
+
+
+
+  border: 1px dashed var(--mgl-border-strong);
+
+  border-radius: var(--mgl-radius-lg);
+
+
+
+  text-align: center;
+
+}
+
+
+
+.mgl-empty-state svg {
+
+  color: #94a3b8;
+
+}
+
+
+
+.mgl-empty-state h3 {
+
+  color: var(--mgl-text);
+
+}
+
+
+
+.mgl-empty-state p {
+
+  color: var(--mgl-text-muted);
+
+}
+
+
+
+/* ============================================================
+
+   SEARCH
+
+   ============================================================ */
+
+
+
+.mgl-search-input {
+
+  background: #ffffff !important;
+
+  color: var(--mgl-text) !important;
+
+
+
+  border: 1px solid var(--mgl-border-strong) !important;
+
+}
+
+
+
+.mgl-search-input:focus {
+
+  border-color: var(--mgl-primary) !important;
+
+}
+
+
+
+/* ============================================================
+
+   SEMÁFORO DE COSTOS
+
+   ============================================================ */
+
+
+
+.cost-ok {
+
+  color: var(--mgl-success);
+
+}
+
+
+
+.cost-warning {
+
+  color: var(--mgl-warning);
+
+}
+
+
+
+.cost-danger {
+
+  color: var(--mgl-danger);
+
+}
+
+
+
+.cost-critical {
+
+  color: var(--mgl-critical);
+
+}
+
+
+
+.cost-critical-background {
+
+  background: var(--mgl-critical-soft);
+
+}
+
+
+
+/* ============================================================
+
+   TEXTO TAILWIND
+
+   Evita baja legibilidad dentro de main.
+
+   ============================================================ */
+
+
+
+main .text-slate-300 {
+
+  color: #64748b !important;
+
+}
+
+
+
+main .text-slate-400 {
+
+  color: #64748b !important;
+
+}
+
+
+
+main .text-slate-500 {
+
+  color: #475569 !important;
+
+}
+
+
+
+main .text-slate-600 {
+
+  color: #334155 !important;
+
+}
+
+
+
+main .text-slate-700 {
+
+  color: #1e293b !important;
+
+}
+
+
+
+main .text-slate-800,
+
+main .text-slate-900,
+
+main .text-slate-950 {
+
+  color: #0f172a !important;
+
+}
+
+
+
+/* ============================================================
+
+   BORDES
+
+   ============================================================ */
+
+
+
+main .border-slate-700,
+
+main .border-slate-800,
+
+main .border-slate-900 {
+
+  border-color: var(--mgl-border) !important;
+
+}
+
+
+
+main .border-slate-300,
+
+main .border-slate-200 {
+
+  border-color: var(--mgl-border) !important;
+
+}
+
+
+
+/* ============================================================
+
+   FONDOS GRISES
+
+   Reduce el exceso de gris oscuro heredado.
+
+   ============================================================ */
+
+
+
+main .bg-slate-600,
+
+main .bg-slate-500 {
+
+  background: var(--mgl-support) !important;
+
+  color: var(--mgl-text-secondary) !important;
+
+}
+
+
+
+main .bg-slate-200,
+
+main .bg-slate-100,
+
+main .bg-slate-50 {
+
+  background: var(--mgl-support) !important;
+
+}
+
+
+
+/* ============================================================
+
+   STATUS SYNC
+
+   ============================================================ */
+
+
+
+.mgl-sync-ok {
+
+  background: var(--mgl-success-soft);
+
+  color: #15803d;
+
+
+
+  border: 1px solid var(--mgl-success-border);
+
+}
+
+
+
+.mgl-sync-error {
+
+  background: var(--mgl-danger-soft);
+
+  color: #dc2626;
+
+
+
+  border: 1px solid var(--mgl-danger-border);
+
+}
+
+
+
+/* ============================================================
+
+   SCROLLBAR
+
+   ============================================================ */
+
+
+
+* {
+
+  scrollbar-width: thin;
+
+  scrollbar-color: #cbd5e1 transparent;
+
+}
+
+
+
+*::-webkit-scrollbar {
+
+  width: 8px;
+
+  height: 8px;
+
+}
+
+
+
+*::-webkit-scrollbar-track {
+
+  background: transparent;
+
+}
+
+
+
+*::-webkit-scrollbar-thumb {
+
+  background: #cbd5e1;
+
+  border-radius: 9999px;
+
+}
+
+
+
+*::-webkit-scrollbar-thumb:hover {
+
+  background: #94a3b8;
+
+}
+
+
+
+/* ============================================================
+
+   ACCESIBILIDAD
+
+   ============================================================ */
+
+
+
+:focus-visible {
+
+  outline: 2px solid var(--mgl-primary);
+
+  outline-offset: 2px;
+
+}
+
+
+
+button:focus:not(:focus-visible),
+
+a:focus:not(:focus-visible) {
+
+  outline: none;
+
+}
+
+
+
+/* ============================================================
+
+   RESPONSIVE
+
+   ============================================================ */
+
+
+
+@media (max-width: 1024px) {
+
+  .mgl-project-hero h1 {
+
+    font-size: 1.75rem;
+
+  }
+
+}
+
+
+
+@media (max-width: 768px) {
+
+  body {
+
+    font-size: 14px;
+
+  }
+
+
+
+  .mgl-project-hero {
+
+    border-radius: 12px;
+
+  }
+
+
+
+  .mgl-project-hero h1 {
+
+    font-size: 1.5rem;
+
+  }
+
+
+
+  .mgl-card,
+
+  .mgl-dependencies-panel {
+
+    border-radius: 10px;
+
+  }
+
+}
+
+
+
+/* ============================================================
+
+   MGL SYSTEMS — FIN
+
+   ============================================================ */
+
+/* ============================================================
+   WORKSPACE SIDEBAR — scroll + collapsed shell alignment
+   ============================================================ */
+
+.mgl-manager-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+@media (min-width: 1024px) {
+  .mgl-workspace-main {
+    transition: margin-left 150ms ease;
+  }
+
+  .mgl-workspace-header {
+    transition: padding-left 150ms ease;
+  }
+
+  html[data-sidebar-collapsed='true'] .mgl-workspace-main {
+    margin-left: 4rem !important;
+  }
+
+  html[data-sidebar-collapsed='true'] .mgl-workspace-header {
+    padding-left: 4rem !important;
+  }
+}

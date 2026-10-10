@@ -1,0 +1,9 @@
+MGL Systems — Fase 5 Optimizada v2
+
+Corrección:
+- workspace-header.tsx: enlaces móviles tipados explícitamente para evitar TS2322 en Next.js Link href.
+- No requiere cambios en Supabase.
+- Versión de paquete: 0.5.2.
+
+Validar con:
+  npm run verify

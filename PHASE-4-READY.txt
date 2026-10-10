@@ -1,0 +1,20 @@
+MGL Systems — Fase 4
+
+Incluye:
+- Proyectos: ficha, estado, fechas y edición admin/PM.
+- Tareas: Kanban, responsables, prioridad, progreso, dependencias y soft-delete local-first.
+- Documentos: referencias Drive/OneDrive local-first.
+- SST: inspecciones, incidentes, capacitaciones y permisos local-first.
+- Equipo: membresías por proyecto sobre perfiles existentes.
+- Vistas consolidadas de operación.
+- Sincronización inmediata tras mutaciones locales.
+
+Backend remoto:
+- Sin nueva migración en Fase 4; usa RLS/RPC/sync_mutation ya existentes.
+- RLS y migraciones permanecen sin cambios.
+- Advisor actual: 1 WARN de Auth por "Leaked Password Protection Disabled". No es un cambio de Fase 4; conviene habilitarlo en Auth antes de producción.
+
+Validación local requerida:
+  npm install
+  npm run verify
+  npm run dev

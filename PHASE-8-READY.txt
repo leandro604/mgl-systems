@@ -1,0 +1,18 @@
+MGL Systems · Fase 8
+Version: 0.8.0
+
+Incluye:
+- EDT / WBS sobre las tareas existentes
+- tipos actividad, hito y resumen
+- cronograma con fechas y pesos
+- dependencias FS / SS / FF / SF + lag
+- Gantt actual vs línea base
+- ruta crítica CPM y holguras
+- línea base versionada e inmutable
+- historial automático de avance
+- planificado vs real + Curva S
+- vínculo actividad ↔ partida presupuestal
+- RPC consolidada para mantener navegación rápida
+- migración Dexie v2 sin borrar la caché local
+
+Base: MGL-Systems-Fase-7

@@ -1,0 +1,23 @@
+MGL Systems — Fase 5
+
+Backend remoto aplicado:
+- migration 20260924165342_phase5_financial_core
+- suppliers + fiscal_series
+- transition_purchase_order RPC
+- queue_invoice RPC
+- project_financial_summary view
+
+Frontend:
+- proveedores
+- compras globales y por proyecto
+- detalle de orden y partidas
+- facturación global y por proyecto
+- series fiscales
+- detalle de comprobante y cola fiscal
+
+SUNAT:
+- UBL/PSE/OSE-ready boundary
+- no se almacenan credenciales fiscales en frontend
+- no se simula CDR ni aceptación
+
+Pendiente de cierre: ejecutar npm install && npm run verify en el equipo del usuario.

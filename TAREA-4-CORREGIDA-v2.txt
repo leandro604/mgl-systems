@@ -1,0 +1,3 @@
+MGL Systems 0.8.5 — Tarea 4 Corregida v2
+Corrección: calculateCpm acepta el subconjunto estructural de tareas requerido por CPM, compatible con LocalTask stage_id nullable y TaskRow remoto.
+No hay cambios de Supabase.

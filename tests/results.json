@@ -1,0 +1,235 @@
+{
+  "engine": "PGlite PostgreSQL; Supabase Auth stub",
+  "tested_at": "2026-09-26T23:44:42.891Z",
+  "tests": [
+    {
+      "name": "Schema executes transactionally",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 3 onboarding SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 5 financial SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 6 project control SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 7 inventory SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 7 atomic inventory RPC SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 7 inventory currency SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 7 covering indexes SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 8 planning SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 8 planning integrity SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 8 planning context SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Phase 8 covering indexes SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Authenticated user can bootstrap company as initial admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Company bootstrap is idempotent for the same authenticated user",
+      "status": "PASS"
+    },
+    {
+      "name": "Create project RPC returns project and automatically assigns creator",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin sees own company only",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin sees only assigned project, not unassigned or foreign",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin cannot update unassigned project",
+      "status": "PASS"
+    },
+    {
+      "name": "Cannot create project for foreign company",
+      "status": "PASS"
+    },
+    {
+      "name": "Cross-company project member rejected by FK",
+      "status": "PASS"
+    },
+    {
+      "name": "Cannot assign nonmember from another project/company",
+      "status": "PASS"
+    },
+    {
+      "name": "Cannot change tenant identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Cannot physically delete tasks",
+      "status": "PASS"
+    },
+    {
+      "name": "Dependencies reject cycles",
+      "status": "PASS"
+    },
+    {
+      "name": "LWW rejects stale update",
+      "status": "PASS"
+    },
+    {
+      "name": "Clock guard rejects future writes",
+      "status": "PASS"
+    },
+    {
+      "name": "Profile role cannot be self-escalated",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker sees project tasks",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker can update assigned task progress",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot modify title",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot modify another assignee task",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot add project members",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker can create self-assigned task",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot forge task creator",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot forge synchronization logs",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can create supplier master",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase order snapshots selected supplier",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase order totals include IGV",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase order state machine issues and receives",
+      "status": "PASS"
+    },
+    {
+      "name": "Issued purchase order lines are locked",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase order cannot move backwards",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can configure fiscal series",
+      "status": "PASS"
+    },
+    {
+      "name": "Client cannot tamper fiscal next number",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can create invoice draft",
+      "status": "PASS"
+    },
+    {
+      "name": "Client cannot set SUNAT accepted status",
+      "status": "PASS"
+    },
+    {
+      "name": "Client cannot forge CDR",
+      "status": "PASS"
+    },
+    {
+      "name": "Invoice totals calculated from decimal amounts",
+      "status": "PASS"
+    },
+    {
+      "name": "Supervisor cannot read financial or supplier data",
+      "status": "PASS"
+    },
+    {
+      "name": "Accepted invoice requires CDR evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Invoice queue assigns configured fiscal sequence atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "Fiscal sequence advances for next invoice",
+      "status": "PASS"
+    },
+    {
+      "name": "Financial summary exposes committed costs and emitted invoices to admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can create draft budget version and hierarchy",
+      "status": "PASS"
+    },
+    {
+      "name": "Budget baseline activation freezes budget items",
+      "status": "PASS"
+    },
+    {
+      "name": "Physical progress derives from executed quantities",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase line can link active budget cost code",
+      "status": "PASS"
+    },
+    {
+      "name": "Valuation snapshots baseline unit price",
+      "status": "FAIL",
+      "error": "permission denied for table valuation_items"
+    }
+  ]
+}

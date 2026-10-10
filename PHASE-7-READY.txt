@@ -1,0 +1,15 @@
+MGL Systems · Fase 7
+Version: 0.7.0
+
+Incluye:
+- catálogo de materiales
+- almacenes por proyecto
+- requerimientos y aprobaciones
+- ingresos, salidas y transferencias
+- recepción vinculada a órdenes de compra
+- stock valorizado por costo promedio
+- alertas de stock mínimo
+- trazabilidad a centro de costo
+- RLS + RPCs transaccionales
+
+Base: MGL-Systems-Fase-6-Corregida-v1

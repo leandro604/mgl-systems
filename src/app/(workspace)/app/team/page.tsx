@@ -1,0 +1,8 @@
+import { Card, CardContent } from '@/components/ui/card'
+import { requireWorkspaceContext } from '@/features/auth/server'
+import { parseWorkspaceInvitations } from '@/features/team/parsers'
+import { WorkspaceTeamManager } from '@/features/team/workspace-team-manager'
+import type { AppRole } from '@/features/team/types'
+
+export const dynamic='force-dynamic'
+export default async function TeamPage({searchParams}:{searchParams:Promise<{project?:string|string[]}>}){const[{project},workspace]=await Promise.all([searchParams,requireWorkspaceContext()]);const{supabase,company,profile,userId,projects}=workspace;const initialProjectId=typeof project==='string'&&projects.some((p)=>p.id===project)?project:undefined;const[profilesResult,invitationsResult]=await Promise.all([supabase.from('profiles').select('id,user_id,full_name,role,created_at').eq('company_id',company.id).is('deleted_at',null).order('full_name'),profile.role==='admin'?supabase.rpc('list_workspace_invitations'):Promise.resolve({data:null,error:null})]);if(profilesResult.error)throw profilesResult.error;if(invitationsResult.error)throw invitationsResult.error;const members=(profilesResult.data??[]).map((m)=>({...m,role:m.role as AppRole}));return <div className="mx-auto max-w-6xl space-y-6"><h1 className="text-2xl font-semibold tracking-tight">Equipo</h1><Card><CardContent className="pt-6"><WorkspaceTeamManager members={members} invitations={parseWorkspaceInvitations(invitationsResult.data)} projects={projects.map(({id,code,name})=>({id,code,name}))} currentUserId={userId} canManage={profile.role==='admin'} {...(initialProjectId?{initialProjectId}:{})}/></CardContent></Card></div>}

@@ -1,0 +1,9 @@
+{
+  "name": "MGL Systems",
+  "short_name": "MGL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08111d",
+  "theme_color": "#08111d",
+  "description": "Gestión de proyectos de construcción con arquitectura local-first"
+}
