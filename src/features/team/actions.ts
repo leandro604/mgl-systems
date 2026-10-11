@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { requireAuthenticatedUser, requireWorkspaceContext } from '@/features/auth/server'
+import { userCapacityMessage } from '@/features/billing/entitlements'
 import { getRequestOrigin } from '@/lib/http/origin'
 import type { FormActionState } from '@/features/auth/types'
 import type { InviteMemberState } from './types'
@@ -48,8 +49,10 @@ export async function inviteWorkspaceMemberAction(_previous: InviteMemberState, 
   })
   if (!parsed.success) return { status: 'error', message: parsed.error.issues[0]?.message ?? 'Revisa los datos de la invitación.' }
 
-  const { supabase, profile } = await requireWorkspaceContext()
+  const { supabase, profile, company } = await requireWorkspaceContext()
   if (profile.role !== 'admin') return { status: 'error', message: 'Solo un administrador puede invitar usuarios a la empresa.' }
+  const capacityMessage = await userCapacityMessage(company.id)
+  if (capacityMessage) return { status: 'error', message: capacityMessage }
 
   const { data, error } = await supabase.rpc('create_workspace_invitation', {
     p_email: parsed.data.email.toLowerCase(),

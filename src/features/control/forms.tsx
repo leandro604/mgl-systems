@@ -21,9 +21,9 @@ export function BudgetCreateForm({ projectId, currency }: { projectId: string; c
   return <form action={action} className="space-y-4">
     <input type="hidden" name="project_id" value={projectId} /><Message state={state} />
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="space-y-2"><Label htmlFor="budget_name">Nombre</Label><Input id="budget_name" name="name" placeholder="Presupuesto contractual" required /></div>
+      <div className="space-y-2"><Label htmlFor="budget_name">Nombre</Label><Input id="budget_name" name="name" placeholder="Nombre" required /></div>
       <div className="space-y-2"><Label htmlFor="budget_currency">Moneda</Label><select id="budget_currency" name="currency" className={selectClass} defaultValue={currency}><option value="PEN">PEN · Soles</option><option value="USD">USD · Dólares</option></select></div>
-      <div className="space-y-2 sm:col-span-2"><Label htmlFor="budget_notes">Notas</Label><textarea id="budget_notes" name="notes" className={textareaClass} placeholder="Alcance, referencia contractual, revisión..." /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="budget_notes">Notas</Label><textarea id="budget_notes" name="notes" className={textareaClass} placeholder="Notas" /></div>
     </div>
     <SubmitButton pendingLabel="Creando versión..."><Layers3 />Crear versión</SubmitButton>
   </form>
@@ -38,7 +38,7 @@ export function BudgetItemForm({ projectId, budgetId, groups }: { projectId: str
       <div className="space-y-2"><Label htmlFor="parent_id">Grupo padre</Label><select id="parent_id" name="parent_id" className={selectClass} defaultValue=""><option value="">Sin grupo</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.code} · {group.description}</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="item_code">Código</Label><Input id="item_code" name="code" placeholder="07.01.03" required /></div>
       <div className="space-y-2"><Label htmlFor="sort_order">Orden</Label><Input id="sort_order" name="sort_order" type="number" min="0" defaultValue="0" /></div>
-      <div className="space-y-2 md:col-span-2"><Label htmlFor="item_description">Descripción</Label><Input id="item_description" name="description" placeholder="Cable S/FTP Cat 7A" required /></div>
+      <div className="space-y-2 md:col-span-2"><Label htmlFor="item_description">Descripción</Label><Input id="item_description" name="description" placeholder="Descripción" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_code">Unidad</Label><Input id="unit_code" name="unit_code" defaultValue="NIU" /></div>
       <div className="space-y-2"><Label htmlFor="quantity">Metrado</Label><Input id="quantity" name="quantity" type="number" min="0" step="0.0001" defaultValue="1" /></div>
       <div className="space-y-2"><Label htmlFor="unit_price">P.U. sin IGV</Label><Input id="unit_price" name="unit_price" type="number" min="0" step="0.0001" defaultValue="0" /></div>
@@ -61,7 +61,7 @@ export function ProgressForm({ projectId, items, today }: { projectId: string; i
       <div className="space-y-2"><Label htmlFor="progress_item">Partida</Label><select id="progress_item" name="budget_item_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar partida</option>{usable.map((item) => <option key={item.budget_item_id} value={item.budget_item_id}>{item.code} · {item.description} ({item.unit_code})</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="progress_quantity">Metrado ejecutado</Label><Input id="progress_quantity" name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
       <div className="space-y-2"><Label htmlFor="progress_on">Fecha</Label><Input id="progress_on" name="progress_on" type="date" defaultValue={today} required /></div>
-      <div className="space-y-2 md:col-span-3"><Label htmlFor="progress_notes">Sustento / observación</Label><Input id="progress_notes" name="notes" placeholder="Frente, nivel, protocolo, observación..." /></div>
+      <div className="space-y-2 md:col-span-3"><Label htmlFor="progress_notes">Sustento / observación</Label><Input id="progress_notes" name="notes" placeholder="Observación" /></div>
     </div>
     <SubmitButton disabled={usable.length === 0} pendingLabel="Registrando..."><Activity />Registrar avance</SubmitButton>
   </form>
@@ -74,7 +74,7 @@ export function ValuationForm({ projectId, budgetId, nextNumber }: { projectId: 
       <div className="space-y-2"><Label htmlFor="valuation_number">N.º valorización</Label><Input id="valuation_number" name="number" type="number" min="1" defaultValue={nextNumber} required /></div>
       <div className="space-y-2"><Label htmlFor="period_start">Inicio</Label><Input id="period_start" name="period_start" type="date" required /></div>
       <div className="space-y-2"><Label htmlFor="period_end">Fin</Label><Input id="period_end" name="period_end" type="date" required /></div>
-      <div className="space-y-2 sm:col-span-3"><Label htmlFor="valuation_notes">Notas</Label><Input id="valuation_notes" name="notes" placeholder="Periodo, cliente, sustento..." /></div>
+      <div className="space-y-2 sm:col-span-3"><Label htmlFor="valuation_notes">Notas</Label><Input id="valuation_notes" name="notes" placeholder="Notas" /></div>
     </div><SubmitButton pendingLabel="Creando valorización..."><CircleDollarSign />Crear valorización</SubmitButton>
   </form>
 }
@@ -85,7 +85,7 @@ export function ValuationLineForm({ projectId, valuationId, items }: { projectId
     <div className="grid gap-4 md:grid-cols-[1.7fr_.55fr]">
       <div className="space-y-2"><Label htmlFor="valuation_item">Partida</Label><select id="valuation_item" name="budget_item_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar partida</option>{items.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.description} · {item.unit_code}</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="valuation_quantity">Metrado del periodo</Label><Input id="valuation_quantity" name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
-      <div className="space-y-2 md:col-span-2"><Label htmlFor="valuation_line_notes">Observación</Label><Input id="valuation_line_notes" name="notes" placeholder="Sustento de metrado..." /></div>
+      <div className="space-y-2 md:col-span-2"><Label htmlFor="valuation_line_notes">Observación</Label><Input id="valuation_line_notes" name="notes" placeholder="Observación" /></div>
     </div><SubmitButton disabled={items.length === 0} pendingLabel="Agregando..."><Plus />Agregar partida valorizada</SubmitButton>
   </form>
 }

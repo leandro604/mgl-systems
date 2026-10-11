@@ -102,7 +102,7 @@ export function FiscalSeriesManager({ series }: { series: FiscalSeries[] }) {
         {series.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center">
             <ReceiptText className="mx-auto size-6 text-slate-400" />
-            <p className="mt-2 font-medium text-slate-800">Todavía no hay series fiscales</p>
+            <p className="mt-2 font-medium text-slate-800">Sin series fiscales</p>
             <p className="mt-1 text-sm text-slate-500">Crea F001 para comenzar a numerar facturas de prueba.</p>
           </div>
         ) : (

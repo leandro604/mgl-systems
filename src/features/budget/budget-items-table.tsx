@@ -153,7 +153,7 @@ export function BudgetItemsTable({ projectId, baselineId, currency, role, thresh
   }
 
   if (!baselineId) {
-    return <EmptyState title="Sin línea base" description="Activa un presupuesto como línea base desde Control para registrar costos reales por partida." />
+    return <EmptyState title="Sin línea base" />
   }
 
   const canEditPrice = role !== 'field_worker'
@@ -177,7 +177,7 @@ export function BudgetItemsTable({ projectId, baselineId, currency, role, thresh
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_auto] xl:items-center">
-          <SearchInput value={query} onChange={(event) => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Buscar código, descripción o unidad..." />
+          <SearchInput value={query} onChange={(event) => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Buscar partidas" />
           <select value={stageId} onChange={(event) => setStageId(event.target.value)} className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900">
             <option value="all">Todas las etapas</option>
             {stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.code} · {stage.name}</option>)}
@@ -204,7 +204,7 @@ export function BudgetItemsTable({ projectId, baselineId, currency, role, thresh
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={15} className="py-10 text-center text-slate-500">No hay partidas con estos filtros.</td></tr>
+                <tr><td colSpan={15} className="py-10 text-center text-slate-500">Sin resultados</td></tr>
               ) : filtered.map((item) => {
                 const isGroup = item.item_type === 'group'
                 const stage = stageById.get(item.stage_id)

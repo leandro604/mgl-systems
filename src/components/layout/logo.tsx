@@ -11,7 +11,6 @@ export function Logo({ compact = false, className }: { compact?: boolean; classN
       {!compact ? (
         <span className="leading-tight">
           <span className="block text-sm font-black tracking-[0.18em]">MGL SYSTEMS</span>
-          <span className="block text-[10px] uppercase tracking-[0.22em] text-slate-500">ConTech Workspace</span>
         </span>
       ) : null}
     </Link>

@@ -105,7 +105,7 @@ export function FiscalSettingsForm({ settings, companyRuc }: { settings: Summary
     </div>
 
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <SectionTitle icon={Building2} title="Datos del emisor" description="Información visible en el comprobante y usada para identificar al emisor." />
+      <SectionTitle icon={Building2} title="Datos del emisor" />
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2"><Label>RUC emisor</Label><Input value={companyRuc} disabled /></div>
         <div className="space-y-2"><Label htmlFor="trade_name">Nombre comercial</Label><Input id="trade_name" name="trade_name" defaultValue={settings?.tradeName ?? ''} maxLength={250} /></div>
@@ -121,7 +121,7 @@ export function FiscalSettingsForm({ settings, companyRuc }: { settings: Summary
     </div>
 
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <SectionTitle icon={Phone} title="Contacto del emisor" description="Teléfonos y correos opcionales que pueden mostrarse en el PDF." />
+      <SectionTitle icon={Phone} title="Contacto del emisor" />
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3"><Label>Teléfonos</Label><Button type="button" size="sm" variant="secondary" disabled={phones.length >= 5} onClick={() => setPhones((items) => [...items, ''])}><Plus className="size-4" />Añadir</Button></div>
@@ -137,17 +137,17 @@ export function FiscalSettingsForm({ settings, companyRuc }: { settings: Summary
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <SectionTitle icon={ShieldCheck} title="Credenciales SOL" description="Se guardan cifradas. Dejar en blanco conserva las credenciales existentes." />
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2"><Label htmlFor="sol_user">Usuario SOL</Label><Input id="sol_user" name="sol_user" autoComplete="off" placeholder={settings?.hasSolUser ? '•••••• (conservado)' : 'MODDATOS en Beta o usuario SOL'} /></div>
-        <div className="space-y-2"><Label htmlFor="sol_password">Clave SOL</Label><Input id="sol_password" name="sol_password" type="password" autoComplete="new-password" placeholder={settings?.hasSolPassword ? '•••••••• (conservada)' : 'MODDATOS en Beta o clave SOL'} /></div>
+        <div className="space-y-2"><Label htmlFor="sol_user">Usuario SOL</Label><Input id="sol_user" name="sol_user" autoComplete="off" placeholder={settings?.hasSolUser ? '••••••' : 'MODDATOS'} /></div>
+        <div className="space-y-2"><Label htmlFor="sol_password">Clave SOL</Label><Input id="sol_password" name="sol_password" type="password" autoComplete="new-password" placeholder={settings?.hasSolPassword ? '••••••••' : 'MODDATOS'} /></div>
       </div>
       <p className="mt-3 text-xs text-slate-500">En ambiente Beta, si dejas ambos campos vacíos MGL usa las credenciales de prueba MODDATOS configuradas para ese flujo.</p>
     </div>
 
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <SectionTitle icon={FileKey2} title="Certificado digital" description="Certificado utilizado para firmar el XML antes del envío." />
+      <SectionTitle icon={FileKey2} title="Certificado digital" />
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2"><Label htmlFor="certificate">Certificado PFX / P12</Label><Input id="certificate" name="certificate" type="file" accept=".pfx,.p12,application/x-pkcs12" /></div>
-        <div className="space-y-2"><Label htmlFor="certificate_password">Contraseña del certificado</Label><Input id="certificate_password" name="certificate_password" type="password" autoComplete="new-password" placeholder={settings?.hasCertificatePassword ? '•••••••• (conservada)' : ''} /></div>
+        <div className="space-y-2"><Label htmlFor="certificate_password">Contraseña del certificado</Label><Input id="certificate_password" name="certificate_password" type="password" autoComplete="new-password" placeholder={settings?.hasCertificatePassword ? '••••••••' : ''} /></div>
       </div>
       <p className="mt-3 text-xs text-slate-500">{settings?.hasCertificate ? `Certificado actual: ${settings.certificateName ?? 'cargado'}${settings.certificateUploadedAt ? ` · ${new Date(settings.certificateUploadedAt).toLocaleString('es-PE')}` : ''}` : 'Aún no hay certificado cargado.'}</p>
     </div>
@@ -172,10 +172,10 @@ export function FiscalSettingsForm({ settings, companyRuc }: { settings: Summary
     </div>
 
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <SectionTitle icon={MessageSquareText} title="Mensajes del PDF" description="Textos opcionales para personalizar la representación impresa sin afectar el XML tributario." />
+      <SectionTitle icon={MessageSquareText} title="Mensajes del PDF" />
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2"><Label htmlFor="pdf_thank_you_message">Mensaje de agradecimiento</Label><textarea id="pdf_thank_you_message" name="pdf_thank_you_message" defaultValue={settings?.pdfThankYouMessage ?? ''} maxLength={300} rows={3} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" placeholder="Gracias por su preferencia." /></div>
-        <div className="space-y-2"><Label htmlFor="pdf_additional_message">Mensaje adicional</Label><textarea id="pdf_additional_message" name="pdf_additional_message" defaultValue={settings?.pdfAdditionalMessage ?? ''} maxLength={500} rows={3} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" placeholder="Condiciones de pago, observaciones o información adicional." /></div>
+        <div className="space-y-2"><Label htmlFor="pdf_thank_you_message">Mensaje de agradecimiento</Label><textarea id="pdf_thank_you_message" name="pdf_thank_you_message" defaultValue={settings?.pdfThankYouMessage ?? ''} maxLength={300} rows={3} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" placeholder="Mensaje" /></div>
+        <div className="space-y-2"><Label htmlFor="pdf_additional_message">Mensaje adicional</Label><textarea id="pdf_additional_message" name="pdf_additional_message" defaultValue={settings?.pdfAdditionalMessage ?? ''} maxLength={500} rows={3} className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" placeholder="Mensaje" /></div>
       </div>
     </div>
 
@@ -198,7 +198,7 @@ export function FiscalSettingsForm({ settings, companyRuc }: { settings: Summary
     </div>
 
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <SectionTitle icon={Smartphone} title="Billeteras digitales" description="Yape, Plin u otra billetera que quieras mostrar opcionalmente en el PDF." />
+      <SectionTitle icon={Smartphone} title="Billeteras digitales" />
       <div className="space-y-4">
         {wallets.map((wallet, index) => <div key={`wallet-${index}`} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
           <div className="space-y-1.5"><Label>Billetera</Label><Input value={wallet.provider} onChange={(event) => setWallets((items) => items.map((item, i) => i === index ? { ...item, provider: event.target.value } : item))} placeholder="Yape" /></div>

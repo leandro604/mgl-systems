@@ -62,4 +62,3 @@ export function FieldSidebar({ companyName, fullName, unreadCount = 0 }: { compa
     </aside>
   )
 }
-

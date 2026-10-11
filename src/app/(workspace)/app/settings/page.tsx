@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PlugZap, ReceiptText } from 'lucide-react'
+import { CreditCard, PlugZap, ReceiptText } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CompanySettingsForm, ProfileSettingsForm } from '@/features/auth/settings-forms'
 import { requireWorkspaceContext } from '@/features/auth/server'
@@ -15,9 +15,9 @@ export default async function SettingsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Configuración</h1>
-          <p className="mt-1 text-sm text-slate-500">Tu perfil y las herramientas disponibles para tu rol.</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {isAdmin ? <Link href="/app/configuracion/suscripcion" className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800"><CreditCard className="size-4"/>Suscripción</Link> : null}
           <Link href="/app/configuracion/integraciones" className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800"><PlugZap className="size-4"/>Integraciones</Link>
           {isAdmin ? <Link href="/app/configuracion/facturacion" className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800"><ReceiptText className="size-4"/>Facturación electrónica</Link> : null}
         </div>

@@ -53,7 +53,7 @@ export function InvoiceLineForm({ projectId, invoiceId }: { projectId: string; i
     <input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="invoice_id" value={invoiceId} />
     <Message state={state} />
     <div className="grid gap-4 sm:grid-cols-[1.6fr_.45fr_.55fr_.7fr]">
-      <div className="space-y-2"><Label htmlFor="description">Descripción</Label><Input id="description" name="description" placeholder="Servicio / suministro" required /></div>
+      <div className="space-y-2"><Label htmlFor="description">Descripción</Label><Input id="description" name="description" placeholder="Descripción" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_code">Unidad</Label><Input id="unit_code" name="unit_code" defaultValue="NIU" required /></div>
       <div className="space-y-2"><Label htmlFor="quantity">Cantidad</Label><Input id="quantity" name="quantity" type="number" min="0.0001" step="0.0001" defaultValue="1" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_price">P. unitario sin IGV</Label><Input id="unit_price" name="unit_price" type="number" min="0" step="0.01" required /></div>

@@ -126,7 +126,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
         planned_weight: Number(formData.get('planned_weight') ?? 1),
         budget_item_id: String(formData.get('budget_item_id') ?? '') || null,
       })
-      setMessage(online ? 'Planificación guardada localmente y enviada a sincronización.' : 'Planificación guardada sin conexión; se sincronizará después.')
+      setMessage(online ? 'Planificación guardada' : 'Guardado sin conexión')
       await refreshLocal()
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo actualizar la planificación.') }
     finally { setBusy(false) }
@@ -143,7 +143,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
         dependency_type: String(formData.get('dependency_type') ?? 'FS') as 'FS' | 'SS' | 'FF' | 'SF',
         lag_days: Number(formData.get('lag_days') ?? 0),
       })
-      await refreshLocal(); setMessage('Dependencia añadida al cronograma.')
+      await refreshLocal(); setMessage('Dependencia añadida')
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo crear la dependencia.') }
     finally { setBusy(false) }
   }
@@ -156,7 +156,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
         dependency_type: String(formData.get('dependency_type') ?? dep.dependency_type) as 'FS' | 'SS' | 'FF' | 'SF',
         lag_days: Number(formData.get('lag_days') ?? dep.lag_days),
       })
-      await refreshLocal(); setMessage('Relación CPM actualizada.')
+      await refreshLocal(); setMessage('Relación actualizada')
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo actualizar la dependencia.') }
     finally { setBusy(false) }
   }
@@ -180,7 +180,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
       const supabase = createClient()
       const { error } = await supabase.rpc('create_schedule_baseline', { p_project_id: projectId, p_name: name })
       if (error) throw error
-      setMessage('Nueva línea base creada. La versión anterior quedó conservada como histórica.')
+      setMessage('Línea base creada')
       router.refresh()
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo crear la línea base.') }
     finally { setBusy(false) }
@@ -209,7 +209,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
         {tasks.length === 0 ? <p className="text-sm text-slate-500">Primero crea tareas en el módulo Tareas.</p> : <>
           <label className="text-xs font-semibold text-slate-400">Tarea<select value={selectedTask?.id ?? ''} onChange={(event) => setSelectedTaskId(event.target.value)} className={selectClass}>{orderedTasks.map((task) => <option key={task.id} value={task.id}>{task.wbs_code ? `${task.wbs_code} · ` : ''}{task.title}</option>)}</select></label>
           {selectedTask ? <form key={selectedTask.id} action={saveTaskSchedule} className="mt-4 space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2"><div><Label>Código WBS</Label><Input name="wbs_code" defaultValue={selectedTask.wbs_code} placeholder="Ej. 01.02.03" /></div><label className="text-xs font-semibold text-slate-400">Tipo<select name="task_type" defaultValue={selectedTask.task_type} className={selectClass}><option value="activity">Actividad</option><option value="milestone">Hito</option><option value="summary">Resumen EDT</option></select></label></div>
+            <div className="grid gap-3 sm:grid-cols-2"><div><Label>Código WBS</Label><Input name="wbs_code" defaultValue={selectedTask.wbs_code} placeholder="01.02.03" /></div><label className="text-xs font-semibold text-slate-400">Tipo<select name="task_type" defaultValue={selectedTask.task_type} className={selectClass}><option value="activity">Actividad</option><option value="milestone">Hito</option><option value="summary">Resumen EDT</option></select></label></div>
             <label className="text-xs font-semibold text-slate-400">Padre EDT<select name="parent_task_id" defaultValue={selectedTask.parent_task_id ?? ''} className={selectClass}><option value="">Sin padre</option>{tasks.filter((task) => task.task_type === 'summary' && task.id !== selectedTask.id).map((task) => <option key={task.id} value={task.id}>{task.wbs_code || '—'} · {task.title}</option>)}</select></label>
             <div className="grid gap-3 sm:grid-cols-2"><div><Label>Inicio planificado</Label><Input name="starts_on" type="date" defaultValue={selectedTask.starts_on ?? ''} /></div><div><Label>Fin planificado</Label><Input name="due_on" type="date" defaultValue={selectedTask.due_on ?? ''} /></div></div>
             <div className="grid gap-3 sm:grid-cols-2"><div><Label>Peso de planificación</Label><Input name="planned_weight" type="number" min="0" step="0.01" defaultValue={selectedTask.planned_weight} /></div><label className="text-xs font-semibold text-slate-400">Partida presupuestal<select name="budget_item_id" defaultValue={selectedTask.budget_item_id ?? ''} className={selectClass}><option value="">Sin vínculo</option>{budgetItems.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.description}</option>)}</select></label></div>
@@ -230,7 +230,7 @@ export function PlanningWorkspace({ projectId, role, initialTasks, initialDepend
       </CardContent></Card>
     </section> : null}
 
-    {canBaseline ? <Card><CardHeader><CardTitle>Línea base del cronograma</CardTitle><CardDescription>Captura las tareas, fechas, pesos y dependencias sincronizadas. La versión anterior se conserva para auditoría.</CardDescription></CardHeader><CardContent><form action={createBaseline} className="flex flex-col gap-3 sm:flex-row"><Input name="baseline_name" placeholder={`Ej. Línea base contractual ${new Date().getFullYear()}`} required /><Button type="submit" disabled={busy}><Flag />Crear nueva línea base</Button></form><p className="mt-3 text-xs text-slate-500">Para evitar una fotografía incompleta, MGL bloquea la línea base mientras existan cambios locales de tareas o dependencias pendientes de sincronizar.</p></CardContent></Card> : null}
+    {canBaseline ? <Card><CardHeader><CardTitle>Línea base del cronograma</CardTitle><CardDescription>Captura las tareas, fechas, pesos y dependencias sincronizadas. La versión anterior se conserva para auditoría.</CardDescription></CardHeader><CardContent><form action={createBaseline} className="flex flex-col gap-3 sm:flex-row"><Input name="baseline_name" placeholder={`LB ${new Date().getFullYear()}`} required /><Button type="submit" disabled={busy}><Flag />Crear nueva línea base</Button></form><p className="mt-3 text-xs text-slate-500">Para evitar una fotografía incompleta, MGL bloquea la línea base mientras existan cambios locales de tareas o dependencias pendientes de sincronizar.</p></CardContent></Card> : null}
 
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><CalendarRange className="size-5 text-cyan-300" />Diagrama de Gantt</CardTitle><CardDescription>Barra principal = cronograma actual. Barra fina = línea base activa. Rojo = actividad crítica por CPM.</CardDescription></CardHeader><CardContent className="overflow-x-auto">
       {scheduled.length === 0 ? <p className="text-sm text-slate-500">Asigna fechas a las actividades para construir el Gantt.</p> : <div className="min-w-[900px] space-y-2"><div className="grid grid-cols-[280px_1fr] gap-3 text-[11px] text-slate-500"><span>Actividad</span><div className="flex justify-between"><span>{new Date(ganttMin).toISOString().slice(0,10)}</span><span>{new Date(ganttMax).toISOString().slice(0,10)}</span></div></div>{orderedTasks.filter((task) => task.starts_on && task.due_on).map((task) => { const start = day(task.starts_on!); const finish = day(task.due_on!); const left = (start-ganttMin)/ganttSpan*100; const width = Math.max(task.task_type === 'milestone' ? 0 : 0.8, (finish-start+MS_DAY)/ganttSpan*100); const base=baselineByTask.get(task.id); const metric=cpm.metrics.get(task.id); return <div key={task.id} className="grid grid-cols-[280px_1fr] items-center gap-3 rounded-xl border border-slate-900 px-3 py-2"><div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-200">{task.wbs_code ? `${task.wbs_code} · ` : ''}{task.title}</p><p className="mt-1 text-[10px] text-slate-600">{taskTypeLabel[task.task_type] ?? task.task_type} · {taskDurationDays(task)} d · {task.assignee_id ? memberName.get(task.assignee_id) ?? 'Responsable' : 'Sin responsable'}</p></div><div className="relative h-8 rounded-lg bg-slate-950">{base?.starts_on && base.due_on ? <div className="absolute top-2 h-1 rounded-full bg-slate-600" style={{left:`${(day(base.starts_on)-ganttMin)/ganttSpan*100}%`,width:`${Math.max(.6,(day(base.due_on)-day(base.starts_on)+MS_DAY)/ganttSpan*100)}%`}} /> : null}{task.task_type==='milestone' ? <div className={`absolute top-2.5 size-3 rotate-45 ${metric?.critical ? 'bg-red-400' : 'bg-cyan-400'}`} style={{left:`${left}%`}} /> : <div className={`absolute top-3 h-2 rounded-full ${metric?.critical ? 'bg-red-400' : 'bg-cyan-400'}`} style={{left:`${left}%`,width:`${width}%`}} />}<div className="absolute top-3 h-2 rounded-full bg-white/20" style={{left:`${left}%`,width:`${width * Math.min(100,task.progress)/100}%`}} /></div></div>})}</div>}

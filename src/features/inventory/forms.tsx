@@ -41,8 +41,8 @@ export function MaterialForm() {
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2"><Label htmlFor="sku">SKU / código</Label><Input id="sku" name="sku" placeholder="MAT-001" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_code">Unidad</Label><Input id="unit_code" name="unit_code" defaultValue="NIU" required /></div>
-      <div className="space-y-2 sm:col-span-2"><Label htmlFor="name">Material</Label><Input id="name" name="name" placeholder="Cable S/FTP Cat 7A" required /></div>
-      <div className="space-y-2"><Label htmlFor="category">Categoría</Label><Input id="category" name="category" placeholder="Cableado estructurado" /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="name">Material</Label><Input id="name" name="name" placeholder="Material" required /></div>
+      <div className="space-y-2"><Label htmlFor="category">Categoría</Label><Input id="category" name="category" placeholder="Categoría" /></div>
       <div className="space-y-2"><Label htmlFor="min_stock">Stock mínimo</Label><Input id="min_stock" name="min_stock" type="number" min="0" step="0.0001" defaultValue="0" /></div>
       <div className="space-y-2 sm:col-span-2"><Label htmlFor="notes">Notas</Label><textarea id="notes" name="notes" className={textareaClass} /></div>
     </div>
@@ -57,8 +57,8 @@ export function WarehouseForm({ projectId, profiles }: { projectId: string; prof
     <Message state={state} />
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2"><Label htmlFor="code">Código</Label><Input id="code" name="code" placeholder="ALM-OBRA" required /></div>
-      <div className="space-y-2"><Label htmlFor="name">Nombre</Label><Input id="name" name="name" placeholder="Almacén principal de obra" required /></div>
-      <div className="space-y-2 sm:col-span-2"><Label htmlFor="location">Ubicación</Label><Input id="location" name="location" placeholder="Nivel, sector o dirección" /></div>
+      <div className="space-y-2"><Label htmlFor="name">Nombre</Label><Input id="name" name="name" placeholder="Nombre" required /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="location">Ubicación</Label><Input id="location" name="location" placeholder="Ubicación" /></div>
       <div className="space-y-2 sm:col-span-2"><Label htmlFor="responsible_id">Responsable</Label><select id="responsible_id" name="responsible_id" className={selectClass} defaultValue=""><option value="">Sin responsable asignado</option>{profiles.map((profile) => <option key={profile.user_id} value={profile.user_id}>{profile.full_name} · {profile.role}</option>)}</select></div>
     </div>
     <SubmitButton pendingLabel="Creando almacén..."><Building2 />Crear almacén</SubmitButton>
@@ -73,7 +73,7 @@ export function MaterialRequestForm({ projectId }: { projectId: string }) {
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2"><Label htmlFor="number">N.º requerimiento</Label><Input id="number" name="number" placeholder="REQ-2026-001" required /></div>
       <div className="space-y-2"><Label htmlFor="needed_on">Necesario para</Label><Input id="needed_on" name="needed_on" type="date" /></div>
-      <div className="space-y-2 sm:col-span-2"><Label htmlFor="notes">Motivo / frente de trabajo</Label><textarea id="notes" name="notes" className={textareaClass} placeholder="Indica dónde y para qué se requiere..." /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="notes">Motivo / frente de trabajo</Label><textarea id="notes" name="notes" className={textareaClass} placeholder="Motivo" /></div>
     </div>
     <SubmitButton pendingLabel="Creando requerimiento..."><ClipboardPlus />Crear requerimiento</SubmitButton>
   </form>
@@ -89,7 +89,7 @@ export function MaterialRequestLineForm({ projectId, requestId, materials, budge
       <div className="space-y-2 sm:col-span-2"><Label htmlFor="material_id">Material</Label><select id="material_id" name="material_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar material</option>{materials.map((material) => <option key={material.id} value={material.id}>{material.sku} · {material.name} ({material.unit_code})</option>)}</select></div>
       <div className="space-y-2"><Label htmlFor="quantity">Cantidad</Label><Input id="quantity" name="quantity" type="number" min="0.0001" step="0.0001" defaultValue="1" required /></div>
       <div className="space-y-2"><Label htmlFor="budget_item_id">Centro de costo</Label><select id="budget_item_id" name="budget_item_id" className={selectClass} defaultValue=""><option value="">Sin asignar</option>{usableBudgets.map((item) => <option key={item.budget_item_id} value={item.budget_item_id}>{item.code} · {item.description}</option>)}</select></div>
-      <div className="space-y-2 sm:col-span-2"><Label htmlFor="notes">Observación</Label><Input id="notes" name="notes" placeholder="Especificación, marca referencial, frente..." /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="notes">Observación</Label><Input id="notes" name="notes" placeholder="Observación" /></div>
     </div>
     <SubmitButton disabled={materials.length === 0} pendingLabel="Agregando..."><PackagePlus />Agregar material</SubmitButton>
   </form>
@@ -113,7 +113,7 @@ export function ManualReceiptForm({ projectId, warehouses, materials }: { projec
       <div className="space-y-2"><Label>Material</Label><select name="material_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{materials.map((m) => <option key={m.id} value={m.id}>{m.sku} · {m.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Cantidad</Label><Input name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
       <div className="space-y-2"><Label>Costo unitario sin IGV</Label><Input name="unit_cost" type="number" min="0" step="0.0001" required /></div>
-      <div className="space-y-2 sm:col-span-2"><Label>Notas</Label><Input name="notes" placeholder="Saldo inicial, devolución, regularización..." /></div>
+      <div className="space-y-2 sm:col-span-2"><Label>Notas</Label><Input name="notes" placeholder="Notas" /></div>
     </div><SubmitButton disabled={!warehouses.length || !materials.length} pendingLabel="Registrando ingreso..."><ArrowDownToLine />Registrar ingreso</SubmitButton></form>
 }
 
@@ -124,7 +124,7 @@ export function ManualIssueForm({ projectId, warehouses, materials }: { projectI
       <div className="space-y-2"><Label>Almacén origen</Label><select name="warehouse_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{warehouses.map((w) => <option key={w.id} value={w.id}>{w.code} · {w.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Material</Label><select name="material_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{materials.map((m) => <option key={m.id} value={m.id}>{m.sku} · {m.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Cantidad</Label><Input name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
-      <div className="space-y-2"><Label>Motivo</Label><Input name="notes" placeholder="Merma, pérdida, corrección de inventario..." required /></div>
+      <div className="space-y-2"><Label>Motivo</Label><Input name="notes" placeholder="Motivo" required /></div>
     </div><SubmitButton disabled={!warehouses.length || !materials.length} pendingLabel="Registrando ajuste..."><PackageMinus />Registrar salida</SubmitButton></form>
 }
 
@@ -135,7 +135,7 @@ export function RequestIssueForm({ projectId, warehouses, options }: { projectId
       <div className="space-y-2"><Label>Almacén origen</Label><select name="source_warehouse_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{warehouses.map((w) => <option key={w.id} value={w.id}>{w.code} · {w.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Requerimiento pendiente</Label><select name="request_item_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{options.map((o) => <option key={o.request_item_id} value={o.request_item_id}>{o.request_number} · {o.material_name} · pendiente {o.remaining_quantity} {o.unit_code}</option>)}</select></div>
       <div className="space-y-2"><Label>Cantidad a entregar</Label><Input name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
-      <div className="space-y-2"><Label>Notas</Label><Input name="notes" placeholder="Entregado a / frente..." /></div>
+      <div className="space-y-2"><Label>Notas</Label><Input name="notes" placeholder="Notas" /></div>
     </div><SubmitButton disabled={!warehouses.length || !options.length} pendingLabel="Registrando salida..."><ArrowUpFromLine />Entregar material</SubmitButton></form>
 }
 
@@ -147,7 +147,7 @@ export function TransferForm({ projectId, warehouses, materials }: { projectId: 
       <div className="space-y-2"><Label>Destino</Label><select name="target_warehouse_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{warehouses.map((w) => <option key={w.id} value={w.id}>{w.code} · {w.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Material</Label><select name="material_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{materials.map((m) => <option key={m.id} value={m.id}>{m.sku} · {m.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Cantidad</Label><Input name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
-      <div className="space-y-2 sm:col-span-2"><Label>Notas</Label><Input name="notes" placeholder="Motivo de transferencia" /></div>
+      <div className="space-y-2 sm:col-span-2"><Label>Notas</Label><Input name="notes" placeholder="Motivo" /></div>
     </div><SubmitButton disabled={warehouses.length < 2 || !materials.length} pendingLabel="Transfiriendo..."><ArrowRightLeft />Transferir stock</SubmitButton></form>
 }
 
@@ -158,6 +158,6 @@ export function PurchaseReceiptForm({ projectId, warehouses, options }: { projec
       <div className="space-y-2"><Label>Almacén destino</Label><select name="target_warehouse_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{warehouses.map((w) => <option key={w.id} value={w.id}>{w.code} · {w.name}</option>)}</select></div>
       <div className="space-y-2"><Label>Partida de OC</Label><select name="purchase_order_item_id" className={selectClass} required defaultValue=""><option value="" disabled>Seleccionar</option>{options.map((o) => <option key={o.purchase_order_item_id} value={o.purchase_order_item_id}>{o.order_number} · {o.material_name} · OC {o.remaining_quantity} {o.unit_code}</option>)}</select></div>
       <div className="space-y-2"><Label>Cantidad recibida</Label><Input name="quantity" type="number" min="0.0001" step="0.0001" required /></div>
-      <div className="space-y-2"><Label>Notas</Label><Input name="notes" placeholder="Guía, lote, observación..." /></div>
+      <div className="space-y-2"><Label>Notas</Label><Input name="notes" placeholder="Notas" /></div>
     </div><SubmitButton disabled={!warehouses.length || !options.length} pendingLabel="Registrando recepción..."><ArrowDownToLine />Recibir compra</SubmitButton></form>
 }

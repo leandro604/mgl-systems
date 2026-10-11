@@ -5,10 +5,10 @@ import { Building2, CloudCog, ShieldCheck, WifiOff } from 'lucide-react'
 import { Logo } from '@/components/layout/logo'
 
 const items = [
-  { icon: Building2, title: 'Proyectos centralizados', text: 'Equipo, avance y documentación en un solo workspace.' },
-  { icon: WifiOff, title: 'Trabajo local-first', text: 'Continúa operando incluso cuando la conectividad de obra falla.' },
-  { icon: CloudCog, title: 'Sincronización segura', text: 'Outbox FIFO, idempotencia y reconciliación con Supabase.' },
-  { icon: ShieldCheck, title: 'Permisos por rol', text: 'RLS y control de acceso por empresa y proyecto.' },
+  { icon: Building2, title: 'Proyectos centralizados' },
+  { icon: WifiOff, title: 'Trabajo local-first' },
+  { icon: CloudCog, title: 'Sincronización segura' },
+  { icon: ShieldCheck, title: 'Permisos por rol' },
 ]
 
 export function AuthVisual() {
@@ -26,11 +26,8 @@ export function AuthVisual() {
         <h1 className="mt-5 text-5xl font-black leading-[1.04] tracking-tight text-white xl:text-6xl">
           Del campo al control, sin perder información.
         </h1>
-        <p className="mt-6 max-w-lg text-base leading-7 text-slate-400">
-          MGL Systems combina operación local, sincronización confiable y control por proyecto para equipos de construcción.
-        </p>
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
-          {items.map(({ icon: Icon, title, text }, index) => (
+          {items.map(({ icon: Icon, title }, index) => (
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 12 }}
@@ -40,12 +37,10 @@ export function AuthVisual() {
             >
               <Icon className="mb-3 size-5 text-cyan-300" />
               <div className="text-sm font-semibold text-slate-100">{title}</div>
-              <p className="mt-1 text-xs leading-5 text-slate-500">{text}</p>
             </motion.div>
           ))}
         </div>
       </motion.div>
-      <p className="relative z-10 text-xs text-slate-600">MGL Systems · Fase 8</p>
     </div>
   )
 }

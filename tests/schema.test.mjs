@@ -13,6 +13,7 @@ const BUD=id(801), BUD_GROUP=id(802), BUD_ITEM=id(803), PROGRESS=id(804), VAL=id
 const MAT=id(901), WH1=id(902), WH2=id(903), REQ=id(904), REQ_LINE=id(905), TX_IN=id(906), TX_IN_LINE=id(907), TX_OUT=id(908), TX_OUT_LINE=id(909), TX_TR=id(910), TX_TR_LINE=id(911), PO3=id(912), PO3_LINE=id(913), TX_PO=id(914), TX_PO_LINE=id(915);
 const TX_BAD=id(916), TX_BAD_LINE=id(917);
 const PLAN_SUM=id(1001), PLAN_A=id(1002), PLAN_M=id(1003), PLAN_DEP=id(1004);
+const SUB=id(1101), PAY=id(1102);
 let tick=0;
 const version=()=>`updated_at=clock_timestamp()+interval '${++tick} milliseconds',mutation_id=gen_random_uuid()`;
 async function sql(q){return db.query(q);}
@@ -39,6 +40,9 @@ await test('Phase 8 planning SQL executes',async()=>db.exec(await fs.readFile(ne
 await test('Phase 8 planning integrity SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/phase8-integrity-guard.sql',import.meta.url),'utf8')));
 await test('Phase 8 planning context SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/phase8-performance.sql',import.meta.url),'utf8')));
 await test('Phase 8 covering indexes SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/phase8-covering-indexes.sql',import.meta.url),'utf8')));
+await test('Task 16 Culqi subscription SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/task16-subscriptions.sql',import.meta.url),'utf8')));
+await test('Task 16 billing indexes SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/task16-subscriptions-indexes.sql',import.meta.url),'utf8')));
+await test('Task 16 billing event policy SQL executes',async()=>db.exec(await fs.readFile(new URL('../database/task16-billing-events-policy.sql',import.meta.url),'utf8')));
 await db.exec('BEGIN');
 await sql(`INSERT INTO auth.users VALUES('${B}');`);
 await as(B);
@@ -70,6 +74,17 @@ await test('Create project RPC returns project and automatically assigns creator
 });
 await test('Admin sees own company only',()=>count('companies',1));
 await test('Admin sees only assigned project, not unassigned or foreign',()=>count('projects',1));
+await test('Admin sees public subscription plans',()=>count('subscription_plans',6));
+await root();
+await sql(`INSERT INTO company_subscriptions(id,company_id,plan_id,status,billing_email,idempotency_key,created_by)
+  SELECT '${SUB}','${C}',id,'active','admin@example.com',gen_random_uuid(),'${A}' FROM subscription_plans WHERE code='pro' AND billing_interval='month' LIMIT 1`);
+await sql(`INSERT INTO subscription_payments(id,company_id,subscription_id,provider_event_id,amount_cents,status)
+  VALUES('${PAY}','${C}','${SUB}','evt_test_task16',9900,'paid')`);
+await as(A);
+await test('Admin can read company subscription billing',async()=>{await count('company_subscriptions',1);await count('subscription_payments',1);});
+await as(S);
+await test('Supervisor cannot read subscription billing',async()=>{await count('company_subscriptions',0);await count('subscription_payments',0);});
+await as(A);
 await test('Admin cannot update unassigned project',async()=>{const r=await sql(`UPDATE projects SET name='Forbidden',${version()} WHERE id='${OTHER}' RETURNING id`);assert.equal(r.rows.length,0);});
 await test('Cannot create project for foreign company',()=>denied(`SELECT public.create_project('${id(999)}','${D}','BAD','Forbidden')`,'42501'));
 for(const u of [W,S,P])await sql(`INSERT INTO project_members(company_id,project_id,user_id) VALUES('${C}','${PROJ}','${u}')`);
@@ -299,7 +314,7 @@ await test('Revoked member loses project access',async()=>{await sql(`UPDATE pro
 await as(X);
 await test('Foreign company sees no Alpha tasks or invoices',async()=>{await count('tasks',0);await count('invoices',0);});
 await root();
-await test('All 30 tables have RLS and soft delete',async()=>{const r=await sql(`select count(*)::int as n from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and c.relrowsecurity and exists(select 1 from information_schema.columns a where a.table_schema='public' and a.table_name=c.relname and a.column_name='deleted_at')`);assert.equal(r.rows[0].n,30);});
+await test('All 34 tables have RLS and soft delete',async()=>{const r=await sql(`select count(*)::int as n from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and c.relrowsecurity and exists(select 1 from information_schema.columns a where a.table_schema='public' and a.table_name=c.relname and a.column_name='deleted_at')`);assert.equal(r.rows[0].n,34);});
 await db.exec('SET ROLE anon');
 await test('Anonymous cannot read projects',()=>denied('SELECT * FROM projects','42501'));
 await test('Anonymous cannot execute project RPC',()=>denied(`SELECT create_project('${id(888)}','${C}','NO','No access')`,'42501'));

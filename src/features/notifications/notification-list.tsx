@@ -10,7 +10,7 @@ import { formatNotificationTime, notificationActionUrl, notificationKindLabel, n
 export function NotificationList({
   rows,
   onSetRead,
-  emptyMessage = 'No tienes notificaciones.',
+  emptyMessage = 'Sin notificaciones',
   compact = false,
 }: {
   rows: LocalNotification[]

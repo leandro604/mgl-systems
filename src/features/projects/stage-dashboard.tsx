@@ -72,7 +72,7 @@ export function StageDashboard({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <CardTitle>Desviación global</CardTitle>
-              <CardDescription>Comparación de la línea cotizada frente al costo real registrado.</CardDescription>
+              
             </div>
             <div className="flex items-center gap-2">
               {deviationPositive ? (
@@ -179,13 +179,12 @@ export function StageDashboard({
         <Card>
           <CardHeader>
             <CardTitle>Top 5 partidas con mayor desviación</CardTitle>
-            <CardDescription>Partidas que requieren atención prioritaria por impacto económico.</CardDescription>
+            
           </CardHeader>
           <CardContent>
             {data.topDeviations.length === 0 ? (
               <EmptyState
-                title="Sin desviaciones registradas"
-                description="Cuando se registre costo real por partida, aquí aparecerán las mayores desviaciones."
+                title="Sin desviaciones"
               />
             ) : (
               <div className="overflow-x-auto">
@@ -225,13 +224,12 @@ export function StageDashboard({
               <Activity className="size-4 text-blue-600" aria-hidden="true" />
               <CardTitle>Actividad reciente</CardTitle>
             </div>
-            <CardDescription>Notificaciones recientes visibles para tu usuario.</CardDescription>
+            
           </CardHeader>
           <CardContent>
             {data.recentActivity.length === 0 ? (
               <EmptyState
-                title="Sin actividad reciente"
-                description="Las alertas de costos, tareas y peticiones aparecerán aquí."
+                title="Sin actividad"
               />
             ) : (
               <div className="divide-y divide-slate-100">

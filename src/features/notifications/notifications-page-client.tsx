@@ -54,7 +54,7 @@ export function NotificationsPageClient({
             {!model.ready ? <span className="text-[11px] text-slate-400">Cargando…</span> : null}
           </div>
           {model.error ? <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">{model.error}</div> : null}
-          <NotificationList rows={rows} onSetRead={model.setRead} emptyMessage={filter === 'unread' ? 'No quedan notificaciones sin leer.' : 'Aún no tienes notificaciones.'} />
+          <NotificationList rows={rows} onSetRead={model.setRead} emptyMessage={filter === 'unread' ? 'Sin pendientes' : 'Sin notificaciones'} />
         </section>
 
         {!field ? <NotificationPreferences companyId={companyId} model={model} /> : null}

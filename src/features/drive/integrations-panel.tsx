@@ -122,7 +122,7 @@ export function IntegrationsPanel({ projects, accounts, links }: Props) {
             <Button type="button" variant="ghost" size="sm" disabled={pending || !link.ownerIsCurrentUser} onClick={() => execute(unlinkProjectDriveAction, { link_id: link.id }, 'Carpeta desvinculada.')}><Unlink className="size-4" />Desvincular</Button>
           </div>
         </div>)}
-      </div> : <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Todavía no hay carpetas vinculadas a proyectos.</div>}
+      </div> : <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Sin carpetas vinculadas</div>}
     </section>
   </div>
 }

@@ -20,7 +20,7 @@ export default async function InventoryOverviewPage() {
   const lowStock = projects.reduce((sum, project) => sum + Number(summaries.get(project.id)?.low_stock_count ?? 0), 0)
 
   return <div className="mx-auto max-w-7xl space-y-6">
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">Fase 7</p><h1 className="mt-2 text-3xl font-black tracking-tight text-white">Almacén e inventario</h1><p className="mt-2 text-sm text-slate-400">Existencias, requerimientos y movimientos de materiales por proyecto.</p></div><Badge className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200">Stock derivado de movimientos contabilizados</Badge></div>
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><h1 className="mt-2 text-3xl font-black tracking-tight text-white">Almacén e inventario</h1></div><Badge className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200">Stock derivado de movimientos contabilizados</Badge></div>
 
     <section className="grid gap-4 sm:grid-cols-3">
       <Card><CardContent className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-slate-500">Valor de stock</p><p className="mt-2 text-2xl font-black text-white">{formatMoney(stockValue, data.company.currency)}</p></div><Boxes className="size-5 text-cyan-300" /></div></CardContent></Card>
@@ -29,7 +29,7 @@ export default async function InventoryOverviewPage() {
     </section>
 
     <Card><CardHeader><CardTitle>Inventario por proyecto</CardTitle><CardDescription>Los saldos no se editan manualmente: se reconstruyen desde ingresos, salidas y transferencias publicadas.</CardDescription></CardHeader><CardContent className="space-y-3">
-      {projects.length === 0 ? <p className="text-sm text-slate-500">No tienes proyectos visibles.</p> : projects.map((project) => {
+      {projects.length === 0 ? <p className="text-sm text-slate-500">Sin proyectos</p> : projects.map((project) => {
         const summary = summaries.get(project.id)
         return <Link key={project.id} href={`/app/projects/${project.id}/inventory`} prefetch className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/30 p-4 transition hover:border-cyan-400/30 lg:flex-row lg:items-center">
           <div className="min-w-0 flex-1"><p className="text-sm font-bold text-slate-100">{project.code} · {project.name}</p><p className="mt-1 text-xs text-slate-500">{Number(summary?.warehouse_count ?? 0)} almacenes · {Number(summary?.sku_in_stock ?? 0)} SKU con existencia</p></div>

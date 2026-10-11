@@ -15,7 +15,7 @@ export function CreateProjectForm() {
       {state.message ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{state.message}</div> : null}
       <div className="grid gap-4 sm:grid-cols-[.65fr_1.35fr]">
         <div className="space-y-2"><Label htmlFor="code">Código</Label><Input id="code" name="code" placeholder="HAC-001" maxLength={40} required /></div>
-        <div className="space-y-2"><Label htmlFor="name">Nombre del proyecto</Label><Input id="name" name="name" placeholder="Hospital / Sede / Obra" maxLength={200} required /></div>
+        <div className="space-y-2"><Label htmlFor="name">Nombre del proyecto</Label><Input id="name" name="name" placeholder="Nombre" maxLength={200} required /></div>
       </div>
       <SubmitButton pendingLabel="Creando proyecto..."><FolderPlus />Crear proyecto</SubmitButton>
     </form>

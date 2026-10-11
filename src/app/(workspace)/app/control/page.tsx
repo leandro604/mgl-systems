@@ -24,7 +24,7 @@ export default async function ControlOverviewPage() {
   const withUnassigned = projects.filter((project: PortfolioProject) => Number(summaries.get(project.id)?.unassigned_committed_net ?? 0) > 0).length
 
   return <div className="mx-auto max-w-7xl space-y-6">
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">Fase 6</p><h1 className="mt-2 text-3xl font-black tracking-tight text-white">Control de proyectos</h1><p className="mt-2 text-sm text-slate-400">Presupuesto, compromiso, ejecución, avance físico y valorizaciones en una sola vista.</p></div><Badge className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200">Importes de control sin IGV</Badge></div>
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><h1 className="mt-2 text-3xl font-black tracking-tight text-white">Control de proyectos</h1></div><Badge className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200">Importes de control sin IGV</Badge></div>
 
     <section className="grid gap-4 sm:grid-cols-3">
       <Card><CardContent className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-slate-500">Proyectos visibles</p><p className="mt-2 text-3xl font-black text-white">{projects.length}</p></div><BarChart3 className="size-5 text-cyan-300" /></div></CardContent></Card>

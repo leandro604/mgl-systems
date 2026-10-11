@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  CreditCard,
   FileText,
   FolderKanban,
   LayoutDashboard,
@@ -49,6 +50,7 @@ const utilityNav: ManagerNavItem[] = [
   { href: '/app/reportes', label: 'Reportes', icon: BarChart3, roles: ['admin', 'pm'] },
   { href: '/app/equipos', label: 'Equipo', icon: UsersRound },
   { href: '/app/configuracion', label: 'Configuración', icon: Settings },
+  { href: '/app/configuracion/suscripcion', label: 'Suscripción', icon: CreditCard, roles: ['admin'] },
   { href: '/app/configuracion/facturacion', label: 'Facturación electrónica', icon: ReceiptText, roles: ['admin'] },
   { href: '/app/configuracion/integraciones', label: 'Integraciones', icon: PlugZap },
 ]

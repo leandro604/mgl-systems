@@ -187,7 +187,7 @@ export function ProjectTasksBoard({
 
   async function syncAfterWrite(runtime: OperationalRuntime, successMessage?: string) {
     if (!navigator.onLine) {
-      setMessage('Cambio guardado sin conexión. Quedó pendiente para sincronizar.')
+      setMessage('Guardado sin conexión')
       return
     }
 
@@ -213,9 +213,9 @@ export function ProjectTasksBoard({
       } else if (current.sync_error) {
         setMessage(`La tarea sigue bloqueada: ${current.sync_error}`)
       } else if (current.pending_sync) {
-        setMessage('La tarea sigue pendiente. Revisa el estado de sincronización en la barra superior.')
+        setMessage('Sincronización pendiente')
       } else {
-        setMessage('Tarea sincronizada con Supabase correctamente.')
+        setMessage('Tarea sincronizada')
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No se pudo reintentar la sincronización.')
@@ -253,7 +253,7 @@ export function ProjectTasksBoard({
       const current = await runtime.db.tasks.get(created.id)
       await refresh()
       if (current?.sync_error) setMessage(`Tarea guardada, pero bloqueada: ${current.sync_error}`)
-      else if (current?.pending_sync && navigator.onLine) setMessage('Tarea guardada, pero sigue pendiente. Usa Reintentar para forzar el envío.')
+      else if (current?.pending_sync && navigator.onLine) setMessage('Sincronización pendiente')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No se pudo crear la tarea.')
     } finally {
@@ -421,7 +421,7 @@ export function ProjectTasksBoard({
               name="title"
               required
               maxLength={250}
-              placeholder="Ej. Certificar puntos de red del piso 2"
+              placeholder="Título"
             />
           </div>
 
@@ -432,7 +432,7 @@ export function ProjectTasksBoard({
               name="description"
               rows={3}
               className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-              placeholder="Alcance, criterio de aceptación, observaciones…"
+              placeholder="Descripción"
             />
           </div>
 

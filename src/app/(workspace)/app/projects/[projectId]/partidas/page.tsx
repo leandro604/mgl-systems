@@ -27,8 +27,7 @@ export default async function BudgetItemsPage({ params }: { params: Promise<{ pr
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2"><Table2 className="size-5 text-blue-600" /><h2 className="text-xl font-semibold text-slate-950">Módulo de partidas</h2></div>
-          <p className="mt-1 text-sm text-slate-600">Controla cotizado vs. real por partida y etapa, con edición offline-first.</p>
-        </div>
+                  </div>
         <Button asChild variant="secondary" size="sm"><Link href={`/app/projects/${projectId}/control`}>Presupuestos y valorizaciones <ArrowRight /></Link></Button>
       </div>
 

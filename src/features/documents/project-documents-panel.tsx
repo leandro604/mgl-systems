@@ -92,7 +92,7 @@ export function ProjectDocumentsPanel({ projectId, projectName, initialDocuments
         mime_type: String(data.get('mime_type') ?? 'application/pdf'), size_bytes: Number(data.get('size_bytes') ?? 0), sha256: null,
       })
       form.current?.reset(); createDialog.current?.close()
-      setMessage('Documento guardado localmente. Pendiente de sincronización.')
+      setMessage('Documento guardado')
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo registrar el documento.') }
     finally { setBusy(false) }
   }
@@ -102,7 +102,7 @@ export function ProjectDocumentsPanel({ projectId, projectName, initialDocuments
       if (stages.find((stage) => stage.id === row.stage_id)?.is_locked) throw new Error('Esta etapa está cerrada.')
       const { db, identity } = await resolveOperationalRuntime()
       await setDocumentDeletedLocal(db, identity, row.id, true)
-      setSelectedId(null); setMessage('Documento archivado. Pendiente de sincronización.')
+      setSelectedId(null); setMessage('Documento archivado')
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo archivar.') }
     finally { setBusy(false) }
   }
@@ -114,9 +114,9 @@ export function ProjectDocumentsPanel({ projectId, projectName, initialDocuments
   const activeFilters = (['stage', 'type', 'author', 'from', 'to'] as const).filter((key) => filters[key])
   const filterNames = { stage: 'Etapa', type: 'Tipo', author: 'Autor', from: 'Desde', to: 'Hasta' }
   return <div className="space-y-6">
-    <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold tracking-tight text-slate-900">Documentos</h1><p className="mt-1 text-sm text-slate-500">Biblioteca de {projectName}. Busca por nombre, descripción o carpeta.</p></div><Button disabled={!ready} onClick={() => { setMessage(''); createDialog.current?.showModal() }}><FilePlus2 className="size-4" />Registrar documento</Button></header>
+    <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold tracking-tight text-slate-900">Documentos</h1></div><Button disabled={!ready} onClick={() => { setMessage(''); createDialog.current?.showModal() }}><FilePlus2 className="size-4" />Registrar documento</Button></header>
     <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="Buscar y filtrar documentos">
-      <SearchInput value={filters.query} onChange={(event) => change('query', event.target.value)} onClear={() => change('query', '')} aria-label="Buscar documentos" placeholder="Buscar planos, memorias, metrados…" className="h-14 text-base" />
+      <SearchInput value={filters.query} onChange={(event) => change('query', event.target.value)} onClear={() => change('query', '')} aria-label="Buscar documentos" placeholder="Buscar documentos" className="h-14 text-base" />
       <div className="flex flex-wrap items-end gap-3">
         <label className="grid gap-1 text-xs text-slate-500">Proyecto<select className={selectClass} value={filters.project} disabled={!!projectId} onChange={(event) => { change('project', event.target.value); change('stage', '') }}><option value="">Todos los proyectos</option>{projectOptions.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
         <label className="grid gap-1 text-xs text-slate-500">Etapa<select className={selectClass} value={filters.stage} onChange={(event) => change('stage', event.target.value)}><option value="">Todas las etapas</option>{stages.filter((stage) => !filters.project || !stage.project_id || stage.project_id === filters.project).map((stage) => <option key={stage.id} value={stage.id}>{stageLabel(stage)}{!filters.project ? ` · ${projectOptions.find((project) => project.id === stage.project_id)?.name ?? ''}` : ''}</option>)}</select></label>
@@ -130,19 +130,19 @@ export function ProjectDocumentsPanel({ projectId, projectName, initialDocuments
     {message && <p role="status" className="text-sm text-slate-600">{message}</p>}
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-slate-500" aria-live="polite">{filtered.length} de {documents.length} documentos</p><div className="flex gap-2"><Button variant={view === 'list' ? 'default' : 'secondary'} aria-pressed={view === 'list'} onClick={() => setView('list')}><List className="size-4" />Lista</Button><Button variant={view === 'tree' ? 'default' : 'secondary'} aria-pressed={view === 'tree'} onClick={() => setView('tree')}><Folder className="size-4" />Carpetas</Button></div></div>
-      {filtered.length ? view === 'tree' ? <div className="space-y-4">{trees.map(({ project, tree }) => <div key={project.id}>{!projectId && <h3 className="mb-2 text-sm font-medium text-slate-700">{project.name}</h3>}<FolderTree node={tree} renderRow={renderRow} /></div>)}</div> : filtered.map(renderRow) : <div className="py-12 text-center"><FileText className="mx-auto size-8 text-slate-300" /><p className="mt-3 text-sm text-slate-600">{documents.length ? 'No hay documentos que coincidan con tu búsqueda.' : 'Todavía no hay documentos registrados.'}</p></div>}
+      {filtered.length ? view === 'tree' ? <div className="space-y-4">{trees.map(({ project, tree }) => <div key={project.id}>{!projectId && <h3 className="mb-2 text-sm font-medium text-slate-700">{project.name}</h3>}<FolderTree node={tree} renderRow={renderRow} /></div>)}</div> : filtered.map(renderRow) : <div className="py-12 text-center"><FileText className="mx-auto size-8 text-slate-300" /><p className="mt-3 text-sm text-slate-600">{documents.length ? 'Sin resultados' : 'Sin documentos'}</p></div>}
     </section>
     <dialog ref={createDialog} aria-labelledby="new-document-title" className="m-auto max-h-[90dvh] w-[min(40rem,94vw)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm backdrop:bg-slate-950/30">
       <div className="mb-4 flex items-center justify-between"><h2 id="new-document-title" className="text-lg font-medium">Registrar documento</h2><Button variant="ghost" size="icon" aria-label="Cerrar formulario" onClick={() => createDialog.current?.close()}><X /></Button></div>
       <p className="mb-4 text-sm text-slate-500">Vincula un archivo existente de Drive o OneDrive y conserva su ruta de carpetas.</p>
       <form ref={form} onSubmit={(event) => { event.preventDefault(); if (!busy) void createDocument(new FormData(event.currentTarget)) }} className="space-y-4">
         <label className="grid gap-2 text-sm">Proyecto *<select className={selectClass} required value={creationProject} disabled={!!projectId} onChange={(event) => setCreationProject(event.target.value)}><option value="" disabled>Seleccionar proyecto</option>{projectOptions.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
-        <label className="grid gap-2 text-sm">Nombre<Input name="name" required maxLength={255} placeholder="Plano de comunicaciones — Piso 02" /></label>
+        <label className="grid gap-2 text-sm">Nombre<Input name="name" required maxLength={255} placeholder="Nombre" /></label>
         <label className="grid gap-2 text-sm">Etapa *<select key={creationProject} name="stage_id" required defaultValue="" className={selectClass}><option value="" disabled>Seleccionar etapa</option>{stages.filter((stage) => !stage.project_id || stage.project_id === creationProject).map((stage) => <option key={stage.id} value={stage.id} disabled={stage.is_locked}>{stageLabel(stage)}{stage.is_locked ? ' (cerrada)' : ''}</option>)}</select></label>
         <label className="grid gap-2 text-sm">Descripción<textarea name="description" maxLength={20000} rows={3} className="rounded-lg border border-slate-200 p-3 text-sm" /></label>
-        <label className="grid gap-2 text-sm">Ruta de carpeta<Input name="folder_path" defaultValue="/" maxLength={2000} placeholder="/01_Ingeniería/01_Input/7.1 MEMORIA DESCRIPTIVA" /></label>
+        <label className="grid gap-2 text-sm">Ruta de carpeta<Input name="folder_path" defaultValue="/" maxLength={2000} placeholder="/Carpeta" /></label>
         <label className="grid gap-2 text-sm">Enlace HTTPS<Input name="web_url" type="url" required placeholder="https://drive.google.com/..." /></label>
-        <label className="grid gap-2 text-sm">ID del archivo en el proveedor<Input name="external_file_id" required maxLength={1000} placeholder="ID del archivo de Drive o OneDrive" /></label>
+        <label className="grid gap-2 text-sm">ID del archivo en el proveedor<Input name="external_file_id" required maxLength={1000} placeholder="Archivo ID" /></label>
         <div className="grid gap-3 sm:grid-cols-2"><label className="grid gap-2 text-sm">Proveedor<select name="provider" className={selectClass}><option value="google_drive">Google Drive</option><option value="onedrive">OneDrive</option></select></label><label className="grid gap-2 text-sm">Tipo<select name="mime_type" className={selectClass}><option value="application/pdf">PDF</option><option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Excel</option><option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">Word</option><option value="image/jpeg">Imagen JPEG</option><option value="application/octet-stream">Otro</option></select></label></div>
         <label className="grid gap-2 text-sm">Tamaño en bytes<Input name="size_bytes" type="number" min="0" step="1" defaultValue="0" /></label>
         {message && <p role="status" className="text-sm text-slate-600">{message}</p>}<Button type="submit" disabled={busy}>{busy ? 'Guardando…' : 'Guardar referencia'}</Button>

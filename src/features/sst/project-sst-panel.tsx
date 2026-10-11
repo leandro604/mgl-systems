@@ -52,7 +52,7 @@ export function ProjectSstPanel({ projectId, initialRecords, documents }: Props)
         details: { notes: String(formData.get('notes') ?? '') },
         document_id: String(formData.get('document_id') ?? '') || null,
       })
-      setMessage(navigator.onLine ? 'Registro SST creado y enviado a sincronización.' : 'Registro SST guardado sin conexión.')
+      setMessage(navigator.onLine ? 'Registro SST guardado' : 'Guardado sin conexión')
       await refresh()
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo registrar SST.') }
     finally { setBusy(false) }
@@ -72,7 +72,7 @@ export function ProjectSstPanel({ projectId, initialRecords, documents }: Props)
     <div className="grid gap-5 xl:grid-cols-[.72fr_1.28fr]">
       <form action={createRecord} className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
         <div><h2 className="flex items-center gap-2 font-semibold text-white"><ShieldCheck className="size-4 text-cyan-300" />Nuevo registro SST</h2><p className="mt-1 text-sm text-slate-500">Inspecciones, incidentes, capacitaciones y permisos quedan disponibles offline.</p></div>
-        <div className="space-y-2"><Label htmlFor="sst-title">Título</Label><Input id="sst-title" name="title" required maxLength={250} placeholder="Ej. Inspección de bandejas en piso 3" /></div>
+        <div className="space-y-2"><Label htmlFor="sst-title">Título</Label><Input id="sst-title" name="title" required maxLength={250} placeholder="Título" /></div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-xs font-semibold text-slate-400">Tipo<select name="record_type" className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 text-sm text-slate-100"><option value="inspection">Inspección</option><option value="incident">Incidente</option><option value="training">Capacitación</option><option value="permit">Permiso</option></select></label>
           <div className="space-y-2"><Label htmlFor="occurred_at">Fecha y hora</Label><Input id="occurred_at" name="occurred_at" type="datetime-local" required /></div>
@@ -92,7 +92,7 @@ export function ProjectSstPanel({ projectId, initialRecords, documents }: Props)
             const details = typeof record.details === 'object' && record.details && !Array.isArray(record.details) ? record.details as Record<string, unknown> : {}
             return <article key={record.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"><div className="flex items-start gap-4"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-cyan-400/10 text-cyan-300"><Icon className="size-5" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-slate-100">{record.title}</h3><Badge>{meta.label}</Badge>{record.pending_sync ? <Badge className="border-amber-400/20 bg-amber-400/10 text-amber-200">Local</Badge> : null}</div><p className="mt-1 text-xs text-slate-500">{new Date(record.occurred_at).toLocaleString()}</p>{typeof details.notes === 'string' && details.notes ? <p className="mt-3 text-sm leading-6 text-slate-400">{details.notes}</p> : null}</div><Button type="button" size="icon" variant="ghost" disabled={busy} onClick={() => void archiveRecord(record.id)} title="Archivar"><Trash2 /></Button></div></article>
           })}
-          {records.length === 0 ? <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-600">Todavía no hay registros SST para este proyecto.</div> : null}
+          {records.length === 0 ? <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-600">Sin registros SST</div> : null}
         </div>
       </section>
     </div>

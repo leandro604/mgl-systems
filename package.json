@@ -1,9 +1,9 @@
 {
   "name": "mgl-systems",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
-  "description": "MGL Systems — v0.17.1: administración segura de roles desde Equipo para administradores",
+  "description": "MGL Systems — v0.18.0: suscripciones SaaS recurrentes con Culqi",
   "engines": {
     "node": ">=22.0.0"
   },

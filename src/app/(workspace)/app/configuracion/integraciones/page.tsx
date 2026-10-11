@@ -70,7 +70,7 @@ export default async function Page() {
   })
 
   return <div className="mx-auto max-w-6xl space-y-6">
-    <div><h1 className="text-2xl font-semibold tracking-tight text-slate-950">Integraciones</h1><p className="mt-1 text-sm text-slate-500">Conecta la nube documental de cada proyecto con Google Drive o Microsoft OneDrive.</p></div>
+    <div><h1 className="text-2xl font-semibold tracking-tight text-slate-950">Integraciones</h1></div>
     {driveSchemaPending && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">La base de datos todavía no tiene las tablas de Drive/OneDrive. Aplica <code className="font-mono">20261003143000_task14_drive_onedrive_reinforced.sql</code> en Supabase y recarga esta página.</div>}
     <IntegrationsPanel projects={ctx.projects.map((project) => ({ id: project.id, name: project.name }))} accounts={accounts} links={links} />
   </div>

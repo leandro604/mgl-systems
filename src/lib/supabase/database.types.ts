@@ -1378,6 +1378,172 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['valuation_items']['Insert']>
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          code: string
+          name: string
+          billing_interval: string
+          price_cents: number
+          currency: string
+          max_projects: number | null
+          max_users: number | null
+          features: Json
+          provider: string
+          provider_plan_id: string | null
+          active: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          code: string
+          name: string
+          billing_interval: string
+          price_cents: number
+          currency?: string
+          max_projects?: number | null
+          max_users?: number | null
+          features?: Json
+          provider?: string
+          provider_plan_id?: string | null
+          active?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['subscription_plans']['Insert']>
+        Relationships: []
+      }
+      company_subscriptions: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          company_id: string
+          plan_id: string
+          provider: string
+          provider_customer_id: string | null
+          provider_card_id: string | null
+          provider_subscription_id: string | null
+          provider_status: number | null
+          status: string
+          billing_contact_name: string
+          billing_email: string
+          billing_phone: string
+          billing_address: string
+          billing_city: string
+          card_brand: string | null
+          card_last_four: string | null
+          next_billing_at: string | null
+          canceled_at: string | null
+          cancel_reason: string | null
+          idempotency_key: string
+          created_by: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          company_id: string
+          plan_id: string
+          provider?: string
+          provider_customer_id?: string | null
+          provider_card_id?: string | null
+          provider_subscription_id?: string | null
+          provider_status?: number | null
+          status?: string
+          billing_contact_name?: string
+          billing_email?: string
+          billing_phone?: string
+          billing_address?: string
+          billing_city?: string
+          card_brand?: string | null
+          card_last_four?: string | null
+          next_billing_at?: string | null
+          canceled_at?: string | null
+          cancel_reason?: string | null
+          idempotency_key: string
+          created_by: string
+        }
+        Update: Partial<Database['public']['Tables']['company_subscriptions']['Insert']>
+        Relationships: []
+      }
+      subscription_payments: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          company_id: string
+          subscription_id: string
+          provider: string
+          provider_event_id: string
+          provider_charge_id: string | null
+          amount_cents: number
+          currency: string
+          status: string
+          card_brand: string | null
+          card_last_four: string | null
+          failure_message: string | null
+          paid_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          company_id: string
+          subscription_id: string
+          provider?: string
+          provider_event_id: string
+          provider_charge_id?: string | null
+          amount_cents?: number
+          currency?: string
+          status: string
+          card_brand?: string | null
+          card_last_four?: string | null
+          failure_message?: string | null
+          paid_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['subscription_payments']['Insert']>
+        Relationships: []
+      }
+      billing_events: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          provider: string
+          provider_event_id: string
+          event_type: string
+          company_id: string | null
+          subscription_id: string | null
+          payload: Json
+          processed_at: string | null
+          error: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          provider?: string
+          provider_event_id: string
+          event_type: string
+          company_id?: string | null
+          subscription_id?: string | null
+          payload?: Json
+          processed_at?: string | null
+          error?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['billing_events']['Insert']>
+        Relationships: []
+      }
       invoices: {
         Row: {
           id: string

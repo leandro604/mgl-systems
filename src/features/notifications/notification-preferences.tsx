@@ -43,7 +43,7 @@ export function NotificationPreferences({ companyId, model }: { companyId: strin
         quietEnd: quietEnabled ? `${quietEnd}:00` : null,
         timezone: pref.timezone,
       })
-      setMessage(synced ? 'Preferencias guardadas.' : 'Guardado localmente; se sincronizará al volver la conexión.')
+      setMessage(synced ? 'Preferencias guardadas' : 'Guardado sin conexión')
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : 'No se pudieron guardar las preferencias.')
     } finally {
@@ -68,8 +68,8 @@ export function NotificationPreferences({ companyId, model }: { companyId: strin
         timezone: pref.timezone,
       })
       setMessage(synced
-        ? (next ? 'Push activado en este dispositivo.' : 'Push desactivado en este dispositivo.')
-        : 'El cambio quedó guardado localmente y se sincronizará al volver la conexión.')
+        ? (next ? 'Push activado' : 'Push desactivado')
+        : 'Guardado sin conexión')
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : 'No se pudo cambiar Web Push.')
     } finally {

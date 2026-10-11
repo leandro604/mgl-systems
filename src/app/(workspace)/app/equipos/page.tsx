@@ -36,11 +36,6 @@ export default async function TeamDirectoryPage({ searchParams }: { searchParams
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Equipo</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {isAdmin
-              ? 'Administra los miembros del workspace y define qué interfaz y módulos puede usar cada persona.'
-              : 'Directorio de miembros activos del workspace.'}
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <TeamExcelImport projects={ctx.projects.map(({ id, code, name }) => ({ id, code, name }))} canManage={isAdmin} />

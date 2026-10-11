@@ -236,7 +236,7 @@ export function GlobalSearchCommand({ companyId, userId, projects }: Props) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={handleInputKeyDown}
-                placeholder="Buscar proyecto, tarea, documento o módulo…"
+                placeholder="Buscar"
                 className="h-14 min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:text-base"
                 role="combobox"
                 aria-expanded="true"

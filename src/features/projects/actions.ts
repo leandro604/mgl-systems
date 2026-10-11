@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { requireWorkspaceContext } from '@/features/auth/server'
+import { projectCapacityMessage } from '@/features/billing/entitlements'
 import type { FormActionState } from '@/features/auth/types'
 
 const createSchema = z.object({
@@ -37,6 +38,9 @@ export async function createProjectAction(_previous: FormActionState, formData: 
 
   const { supabase, company, profile } = await requireWorkspaceContext()
   if (profile.role !== 'admin' && profile.role !== 'pm') return { status: 'error', message: 'Tu rol no permite crear proyectos.' }
+
+  const capacityMessage = await projectCapacityMessage(company.id)
+  if (capacityMessage) return { status: 'error', message: capacityMessage }
 
   const projectId = crypto.randomUUID()
   const { error } = await supabase.rpc('create_project', {
