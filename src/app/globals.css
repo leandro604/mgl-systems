@@ -2226,3 +2226,153 @@ a:focus:not(:focus-visible) {
     padding-left: 4rem !important;
   }
 }
+
+/* ============================================================
+   RESPONSIVE FOUNDATION — v0.18.2
+   ============================================================ */
+
+.mgl-workspace {
+  overflow-x: clip;
+}
+
+.mgl-hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mgl-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.mgl-table-scroll {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.mgl-table-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.mgl-table-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+@media (max-width: 639px) {
+  .mgl-workspace-main {
+    min-width: 0;
+  }
+
+  .mgl-project-hero {
+    overflow-wrap: anywhere;
+  }
+
+  .mgl-project-nav {
+    scroll-padding-inline: 0.75rem;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+  }
+}
+
+/* ============================================================
+   VISUAL REFINEMENT — v0.18.3
+   ============================================================ */
+@keyframes mgl-drawer-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.mgl-drawer[open] {
+  animation: mgl-drawer-in 200ms ease-out;
+}
+
+.mgl-section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.mgl-page-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.mgl-section-title {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.mgl-table-compact th {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #64748b;
+}
+
+.mgl-table-compact td {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  line-height: 1.25rem;
+}
+
+.mgl-table-scroll th {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #64748b;
+}
+
+.mgl-table-scroll td {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  line-height: 1.25rem;
+}
+
+.mgl-workspace select {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.mgl-workspace textarea {
+  padding: .625rem 1rem;
+}
+
+/* ============================================================
+   REFINAMIENTO VISUAL v0.18.3 — DENSIDAD Y TABLAS
+   ============================================================ */
+.mgl-workspace-main table th {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #64748b;
+}
+
+.mgl-workspace-main table td {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  line-height: 1.25rem;
+}

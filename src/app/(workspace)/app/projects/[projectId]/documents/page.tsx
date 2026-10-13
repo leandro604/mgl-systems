@@ -36,7 +36,7 @@ export default async function ProjectDocumentsPage({
     stageFolderMap: normalizeStageFolderMap(link.stage_folder_map),
   }))
 
-  return <div className="space-y-6">
+  return <div className="space-y-8">
     {driveSchemaPending && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">La integración Drive/OneDrive está pendiente de activar en Supabase. Aplica la migración de la Tarea 14 para habilitar vinculación, sincronización y subida cloud.</div>}
     <CloudUploadPanel projectId={projectId} stages={stageRows} connections={connections} />
     <ProjectDocumentsPanel

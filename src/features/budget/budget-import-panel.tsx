@@ -5,7 +5,7 @@ import { FileSpreadsheet, LoaderCircle, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { importBudgetItemsAction } from './actions'
 import { parseBudgetWorkbook } from './excel-import'
@@ -69,9 +69,6 @@ export function BudgetImportPanel({ projectId, draftBudgets, canImport }: Props)
         <div className="flex items-start justify-between gap-4">
           <div>
             <CardTitle>Importar partidas desde Excel</CardTitle>
-            <CardDescription>
-              Importa la cotización a una versión en borrador. La línea base y la etapa 98 permanecen inmutables.
-            </CardDescription>
           </div>
           <FileSpreadsheet className="size-5 text-blue-600" strokeWidth={1.5} />
         </div>
@@ -89,7 +86,7 @@ export function BudgetImportPanel({ projectId, draftBudgets, canImport }: Props)
                 <select
                   value={budgetId}
                   onChange={(event) => setBudgetId(event.target.value)}
-                  className="mt-2 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
+                  className="mt-2 h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-900"
                 >
                   {draftBudgets.map((budget) => (
                     <option key={budget.id} value={budget.id}>V{budget.version_no} · {budget.name}</option>
@@ -104,7 +101,7 @@ export function BudgetImportPanel({ projectId, draftBudgets, canImport }: Props)
                   type="file"
                   accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                   onChange={(event) => void onFile(event.target.files?.[0])}
-                  className="mt-2 block h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                  className="mt-2 block h-10 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
                 />
               </label>
 
@@ -114,9 +111,6 @@ export function BudgetImportPanel({ projectId, draftBudgets, canImport }: Props)
               </Button>
             </div>
 
-            <p className="text-xs text-slate-500">
-              Columnas reconocidas: Código, Descripción, Unidad, Cantidad/Metrado, Precio unitario, Etapa y Tipo (opcional).
-            </p>
           </>
         )}
 
@@ -133,7 +127,7 @@ export function BudgetImportPanel({ projectId, draftBudgets, canImport }: Props)
               </ul>
             ) : null}
             {parsed.rows.length ? (
-              <div className="overflow-x-auto">
+              <div className="mgl-table-scroll overflow-x-auto">
                 <table className="min-w-[720px] text-xs">
                   <thead><tr><th>Código</th><th>Descripción</th><th>Und.</th><th className="text-right">Metrado</th><th className="text-right">P.U.</th><th>Etapa</th></tr></thead>
                   <tbody>

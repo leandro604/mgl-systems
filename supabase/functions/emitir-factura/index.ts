@@ -1,55 +1,346 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { adminClient, persistInvoiceAsset, scopedClient } from './invoice-drive.ts'
-type Obj=Record<string,unknown>
-type Mode='emit'|'status'|'void'|'preflight'
-const BASE='https://api-facturacion.intifact.com'
-const object=(v:unknown):v is Obj=>typeof v==='object'&&v!==null&&!Array.isArray(v)
-const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8'}})
-const round2=(v:number)=>Math.round((v+Number.EPSILON)*100)/100
-async function sha256(value:string){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function bytesHash(bytes:Uint8Array){const d=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-function validRuc(v:string){if(!/^\d{11}$/.test(v))return false;const w=[5,4,3,2,7,6,5,4,3,2];const sum=w.reduce((s,n,i)=>s+Number(v[i])*n,0);let c=11-(sum%11);if(c===10)c=0;if(c===11)c=1;return c===Number(v[10])}
-function stateOf(data:Obj,fallback='ENCOLADO'){if(typeof data.estado==='string')return data.estado;if(typeof data.estadoSunat==='string')return data.estadoSunat;if(typeof data.status==='string')return data.status;return fallback}
-async function fetchAsset(key:string,id:string,asset:'pdf'|'xml'|'cdr'){const suffix=asset==='pdf'?'pdf?format=a4':asset;const r=await fetch(`${BASE}/api/v1/invoice/${encodeURIComponent(id)}/${suffix}`,{headers:{authorization:`Bearer ${key}`}});if(!r.ok)throw new Error(`Intifact ${asset.toUpperCase()} HTTP ${r.status}`);return new Uint8Array(await r.arrayBuffer())}
-async function finalizeAccepted(invoiceId:string,documentId:string,apiKey:string,pse:unknown,codeHint?:string|null){const admin=adminClient();let pdfUrl:null|string=null,xmlUrl:null|string=null,cdrUrl:null|string=null,cdrHash:null|string=null,archiveError:null|string=null;for(const asset of ['pdf','xml','cdr'] as const){try{const bytes=await fetchAsset(apiKey,documentId,asset);const stored=await persistInvoiceAsset(invoiceId,asset,bytes,asset==='pdf'?'application/pdf':asset==='xml'?'application/xml':'application/zip',asset==='cdr'?'zip':asset);if(asset==='pdf')pdfUrl=stored.url;if(asset==='xml')xmlUrl=stored.url;if(asset==='cdr'){cdrUrl=stored.url;cdrHash=stored.hash||await bytesHash(bytes)}}catch(e){archiveError=e instanceof Error?e.message:'No se pudo archivar en Drive';if(asset==='cdr'){try{cdrHash=await bytesHash(await fetchAsset(apiKey,documentId,'cdr'))}catch{}}}}const now=new Date().toISOString();const{error}=await admin.from('invoices').update({status:'accepted',provider_status:'ACEPTADO',intifact_document_id:documentId,pse_request_id:documentId,pse_response:pse,cdr_code:codeHint||'0',cdr_url:cdrUrl??`${BASE}/api/v1/invoice/${encodeURIComponent(documentId)}/cdr`,cdr_hash:cdrHash,sunat_pdf_url:pdfUrl,sunat_xml_url:xmlUrl,sunat_cdr_xml_url:cdrUrl,accepted_at:now,last_sunat_check_at:now,sunat_error:archiveError?`Aceptado por SUNAT. ${archiveError}`:null,last_error:archiveError,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);if(error)throw error;return{pdfUrl,xmlUrl,cdrUrl,cdrHash,archiveError}}
-async function syncStatus(invoice:Obj,apiKey:string){const admin=adminClient(),invoiceId=String(invoice.id),documentId=typeof invoice.intifact_document_id==='string'?invoice.intifact_document_id:null;if(!documentId)return{ok:true,status:String(invoice.status),provider_status:invoice.provider_status??null};const response=await fetch(`${BASE}/api/v1/documents/${encodeURIComponent(documentId)}`,{headers:{authorization:`Bearer ${apiKey}`}});const raw:unknown=await response.json().catch(()=>({})),result=object(raw)?raw:{},data=object(result.data)?result.data:result;if(!response.ok||result.success===false)return{ok:false,error:typeof result.message==='string'?result.message:`Intifact HTTP ${response.status}`};const state=stateOf(data,String(invoice.provider_status??'ENVIADO')).toUpperCase(),now=new Date().toISOString(),code=typeof data.codigoRespuesta==='string'?data.codigoRespuesta:typeof data.cdrCode==='string'?data.cdrCode:null;if(state.includes('ACEPT')){const assets=await finalizeAccepted(invoiceId,documentId,apiKey,raw,code);return{ok:true,status:'accepted',provider_status:state,...assets}}if(state.includes('RECHAZ')){const message=typeof data.descripcionRespuesta==='string'?data.descripcionRespuesta:typeof result.message==='string'?result.message:'SUNAT rechazó el comprobante';await admin.from('invoices').update({status:'rejected',provider_status:state,sunat_error:message,last_error:message,pse_response:raw,last_sunat_check_at:now,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return{ok:false,status:'rejected',provider_status:state,error:message}}const sentAt=typeof invoice.sunat_sent_at==='string'?Date.parse(invoice.sunat_sent_at):Date.now(),unknown=Number.isFinite(sentAt)&&Date.now()-sentAt>=120000;await admin.from('invoices').update({status:unknown?'unknown':'submitted',provider_status:unknown?'ENVIADO_SIN_CONFIRMAR':state,pse_response:raw,last_sunat_check_at:now,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return{ok:true,status:unknown?'unknown':'submitted',provider_status:unknown?'ENVIADO_SIN_CONFIRMAR':state}}
-Deno.serve(async(req)=>{
- if(req.method!=='POST')return json({error:'method_not_allowed'},405)
- const auth=req.headers.get('authorization')??'';if(!auth.toLowerCase().startsWith('bearer '))return json({error:'authentication_required'},401)
- const body:unknown=await req.json().catch(()=>null),invoiceId=object(body)&&typeof body.invoice_id==='string'?body.invoice_id:null,modeRaw=object(body)&&typeof body.mode==='string'?body.mode:'emit',mode:Mode=modeRaw==='status'||modeRaw==='void'||modeRaw==='preflight'?modeRaw:'emit'
- if(!invoiceId)return json({error:'invoice_id_required'},400)
- const user=scopedClient(auth),admin=adminClient()
- const{data:invoice,error:invoiceError}=await user.from('invoices').select('*').eq('id',invoiceId).is('deleted_at',null).maybeSingle()
- if(invoiceError)return json({error:invoiceError.message},400);if(!invoice)return json({error:'invoice_not_found'},404)
- const{data:fiscalSettings,error:fiscalSettingsError}=await admin.from('company_fiscal_settings').select('provider').eq('company_id',invoice.company_id).maybeSingle();if(fiscalSettingsError)return json({error:fiscalSettingsError.message},400);if(fiscalSettings?.provider==='sunat_direct'){  const base=Deno.env.get('SUPABASE_URL');if(!base)return json({error:'SUPABASE_URL missing'},500);  const direct=await fetch(`${base}/functions/v1/emitir-factura-sunat`,{method:'POST',headers:{authorization:auth,'content-type':'application/json'},body:JSON.stringify({invoice_id:invoiceId,mode})}).catch(()=>null);  if(!direct)return json({error:'No se pudo invocar el emisor SUNAT directo'},502);  const responseBody=await direct.arrayBuffer();  return new Response(responseBody,{status:direct.status,headers:{'content-type':direct.headers.get('content-type')??'application/json; charset=utf-8'}});}const apiKey=Deno.env.get('INTIFACT_API_KEY');if(!apiKey){const message='Configura tu API Key de Intifact primero';await admin.from('invoices').update({sunat_error:message,last_error:message,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({error:message},503)}
- if(mode==='status')return json(await syncStatus(invoice as Obj,apiKey))
- if(mode==='void'){
-   if(invoice.status!=='accepted'||!invoice.series||invoice.number===null)return json({error:'Solo se puede anular un comprobante aceptado'},409)
-   const[{data:items,error:itemsError},{data:company,error:companyError}]=await Promise.all([user.from('invoice_items').select('*').eq('invoice_id',invoiceId).is('deleted_at',null).order('line_number'),user.from('companies').select('ruc').eq('id',invoice.company_id).single()])
-   if(itemsError||companyError||!company)return json({error:itemsError?.message??companyError?.message??'invoice_data_failed'},400)
-   const noteSeries=invoice.document_type==='03'?'BC01':'FC01';let noteNumber=Number(invoice.void_note_number??0)
-   if(!Number.isInteger(noteNumber)||noteNumber<=0){const params=new URLSearchParams({companyRuc:company.ruc,tipoDoc:'07',serie:noteSeries}),nextResponse=await fetch(`${BASE}/api/v1/documents/next-correlativo?${params}`,{headers:{authorization:`Bearer ${apiKey}`}}),nextRaw:unknown=await nextResponse.json().catch(()=>({})),nextResult=object(nextRaw)?nextRaw:{},nextData=object(nextResult.data)?nextResult.data:{};noteNumber=Number(nextData.next??0);if(!nextResponse.ok||!Number.isInteger(noteNumber)||noteNumber<=0)return json({error:typeof nextResult.message==='string'?nextResult.message:'No se pudo reservar correlativo de nota de crédito'},502);await admin.from('invoices').update({void_note_series:noteSeries,void_note_number:noteNumber,void_note_status:'PREPARADO',updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId)}
-   const detail=(items??[]).map(item=>{const qty=Number(item.quantity),unit=Number(item.unit_price),base=round2(qty*unit),tax=round2(base*Number(item.tax_rate)/100);return{unidad:item.unit_code,cantidad:qty,codProducto:`MGL-${item.line_number}`,descripcion:item.description,montoValorUnitario:unit,montoBaseIgv:base,porcentajeIgv:Number(item.tax_rate),igv:tax,tipAfeIgv:item.tax_affectation_code,totalImpuestos:tax,montoPrecioUnitario:round2(unit*(1+Number(item.tax_rate)/100)),montoValorVenta:base}})
-   const gravadas=round2(detail.reduce((s,r)=>s+r.montoValorVenta,0)),igv=round2(detail.reduce((s,r)=>s+r.igv,0)),total=round2(gravadas+igv),notePayload={empresaRuc:company.ruc,tipoDoc:'07',serie:noteSeries,correlativo:String(noteNumber),tipoMoneda:invoice.currency,fechaEmision:new Date().toISOString().slice(0,10),tipoOperacion:'0101',clienteTipoDoc:invoice.customer_document_type,clien
-teNumDoc:invoice.customer_document_number,clienteRazonSocial:invoice.customer_name,afectadoTipoDoc:invoice.document_type,afectadoNumDoc:`${invoice.series}-${invoice.number}`,motivoCod:'01',motivoDes:'ANULACION DE LA OPERACION',detalle,montoOperGravadas:gravadas,montoOperExoneradas:0,montoOperInafectas:0,montoOperGratuitas:0,montoIgv:igv,totalImpuestos:igv,valorVenta:gravadas,subTotal:total,montoImpVenta:total}
-   const response=await fetch(`${BASE}/api/v1/note/send`,{method:'POST',headers:{authorization:`Bearer ${apiKey}`,'content-type':'application/json'},body:JSON.stringify(notePayload)}),raw:unknown=await response.json().catch(()=>({})),result=object(raw)?raw:{},data=object(result.data)?result.data:result
-   if((!response.ok&&response.status!==409)||result.success===false){const message=typeof result.message==='string'?result.message:`Intifact HTTP ${response.status}`;await admin.from('invoices').update({void_note_status:'ERROR',sunat_error:message,last_error:message,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,error:message},response.status>=400&&response.status<500?400:502)}
-   const noteId=typeof data.id==='string'?data.id:invoice.void_note_document_id,state=stateOf(data,'ENCOLADO').toUpperCase();await admin.from('invoices').update({void_note_document_id:noteId,void_note_series:noteSeries,void_note_number:noteNumber,void_note_status:state,status:state.includes('ACEPT')?'voided':'accepted',sunat_error:null,last_error:null,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:true,note_id:noteId,status:state})
- }
- if(invoice.document_type==='01'&&(invoice.customer_document_type!=='6'||!validRuc(invoice.customer_document_number))){const message='RUC del cliente inválido (módulo 11)';await admin.from('invoices').update({sunat_error:message,last_error:message,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,error:message},400)}
- const[{data:items,error:itemsError},{data:company,error:companyError}]=await Promise.all([user.from('invoice_items').select('*').eq('invoice_id',invoiceId).is('deleted_at',null).order('line_number'),user.from('companies').select('ruc,legal_name').eq('id',invoice.company_id).single()])
- if(itemsError||companyError||!company)return json({error:itemsError?.message??companyError?.message??'invoice_data_failed'},400);if(!items?.length)return json({error:'El comprobante requiere al menos una partida'},409)
- if(invoice.status==='draft'&&(!invoice.series||invoice.number===null)){const{error:prepareError}=await user.rpc('prepare_invoice_emission',{p_invoice_id:invoiceId});if(prepareError)return json({error:prepareError.message},400)}
- const{data:prepared,error:preparedError}=await user.from('invoices').select('*').eq('id',invoiceId).single();if(preparedError||!prepared?.series||prepared.number===null)return json({error:preparedError?.message??'No se pudo reservar serie y correlativo'},400);if(prepared.status==='accepted'||prepared.status==='voided')return json({ok:true,idempotent:true,status:prepared.status,document_id:prepared.intifact_document_id})
- const detail=items.map(item=>{const qty=Number(item.quantity),unit=Number(item.unit_price),base=round2(qty*unit),tax=round2(base*Number(item.tax_rate)/100);return{unidad:item.unit_code,cantidad:qty,codProducto:`MGL-${item.line_number}`,descripcion:item.description,montoValorUnitario:unit,montoBaseIgv:base,porcentajeIgv:Number(item.tax_rate),igv:tax,tipAfeIgv:item.tax_affectation_code,totalImpuestos:tax,montoPrecioUnitario:round2(unit*(1+Number(item.tax_rate)/100)),montoValorVenta:base}})
- const gravadas=round2(detail.reduce((s,r)=>s+r.montoValorVenta,0)),igv=round2(detail.reduce((s,r)=>s+r.igv,0)),total=round2(gravadas+igv),invoicePayload={empresaRuc:company.ruc,tipoDoc:prepared.document_type,serie:prepared.series,correlativo:String(prepared.number),tipoMoneda:prepared.currency,fechaEmision:prepared.issued_on,tipoOperacion:'0101',establecimientoCodigo:'0000',clienteTipoDoc:prepared.customer_document_type,clienteNumDoc:prepared.customer_document_number,clienteRazonSocial:prepared.customer_name,clienteDireccion:prepared.customer_address,detalle,montoOperGravadas:gravadas,montoOperExoneradas:0,montoOperInafectas:0,montoOperGratuitas:0,montoIgv:igv,totalImpuestos:igv,valorVenta:gravadas,subTotal:total,montoImpVenta:total,formaPago:[{tipo:'Contado',monto:total,fechaPago:prepared.issued_on}]}
- const hash=await sha256(`${invoiceId}:${JSON.stringify(invoicePayload)}`);if(prepared.intifact_idempotency_hash===hash&&prepared.intifact_document_id)return json(await syncStatus(prepared as Obj,apiKey))
- const response=await fetch(`${BASE}/api/v1/invoice/send`,{method:'POST',headers:{authorization:`Bearer ${apiKey}`,'content-type':'application/json'},body:JSON.stringify(invoicePayload)}).catch(()=>null)
- if(!response){const message='No se pudo conectar con Intifact';await admin.from('invoices').update({intifact_idempotency_hash:hash,sunat_error:message,last_error:message,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,error:message},502)}
- const rawResponse:unknown=await response.json().catch(()=>({})),result=object(rawResponse)?rawResponse:{},data=object(result.data)?result.data:result
- if((!response.ok&&response.status!==409)||result.success===false){const message=typeof result.message==='string'?result.message:`Intifact HTTP ${response.status}`;await admin.from('invoices').update({status:prepared.status==='draft'?'draft':prepared.status,intifact_idempotency_hash:hash,pse_response:result,provider_status:'ERROR',sunat_error:message,last_error:message,updated_at:new Date().toISOString(),mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,error:message,provider:result},response.status>=400&&response.status<500?400:502)}
- const documentId=typeof data.id==='string'?data.id:prepared.intifact_document_id,state=stateOf(data,'ENCOLADO').toUpperCase(),now=new Date().toISOString();if(!documentId){const message='Intifact no devolvió el identificador del documento';await admin.from('invoices').update({status:prepared.status==='draft'?'draft':prepared.status,sunat_error:message,last_error:message,intifact_idempotency_hash:hash,pse_response:result,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,error:message},502)}
- if(state.includes('ACEPT')){await admin.from('invoices').update({status:'submitted',intifact_document_id:documentId,intifact_idempotency_hash:hash,provider_status:state,pse_request_id:documentId,pse_response:result,sunat_error:null,last_error:null,sunat_sent_at:prepared.sunat_sent_at??now,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);const assets=await finalizeAccepted(invoiceId,documentId,apiKey,rawResponse,typeof data.codigoRespuesta==='string'?data.codigoRespuesta:null);return json({ok:true,status:'accepted',document_id:documentId,...assets})}
- if(state.includes('RECHAZ')){const message=typeof data.descripcionRespuesta==='string'?data.descripcionRespuesta:typeof result.message==='string'?result.message:'SUNAT rechazó el comprobante';await admin.from('invoices').update({status:'rejected',intifact_document_id:documentId,intifact_idempotency_hash:hash,provider_status:state,pse_request_id:documentId,pse_response:result,sunat_error:message,last_error:message,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:false,status:'rejected',error:message,document_id:documentId},400)}
- await admin.from('invoices').update({status:'submitted',intifact_document_id:documentId,intifact_idempotency_hash:hash,provider_status:state,pse_request_id:documentId,pse_response:result,sunat_error:null,last_error:null,last_sunat_check_at:now,sunat_sent_at:prepared.sunat_sent_at??now,updated_at:now,mutation_id:crypto.randomUUID()}).eq('id',invoiceId);return json({ok:true,status:'submitted',provider_status:state,document_id:documentId,hash})
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
+import forge from 'npm:node-forge@1.3.1'
+import { SignedXml } from 'npm:xml-crypto@6.1.2'
+import JSZip from 'npm:jszip@3.10.2'
+
+type JsonObject = Record<string, unknown>
+type AdminClient = SupabaseClient
+
+const INTIFACT_BASE = 'https://api-facturacion.intifact.com'
+const SUNAT_BETA = 'https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService'
+const SUNAT_PROD = 'https://e-factura.sunat.gob.pe/ol-ti-itcpfegem/billService'
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json; charset=utf-8' } })
+}
+function isObject(value: unknown): value is JsonObject { return typeof value === 'object' && value !== null && !Array.isArray(value) }
+function round2(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100 }
+function escapeXml(value: unknown) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+}
+function cleanPem(value: string) { return value.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\s+/g, '') }
+function base64UrlBytes(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - value.length % 4) % 4)
+  const raw = atob(normalized)
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0))
+}
+function concatBytes(...chunks: Uint8Array[]) {
+  const out = new Uint8Array(chunks.reduce((sum, c) => sum + c.length, 0))
+  let offset = 0
+  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length }
+  return out
+}
+async function decryptSecret(value: string) {
+  const rawKey = Deno.env.get('FISCAL_CREDENTIALS_ENCRYPTION_KEY')
+  if (!rawKey || rawKey.length < 24) throw new Error('fiscal_encryption_key_missing')
+  const [version, ivRaw, tagRaw, encryptedRaw] = value.split('.')
+  if (version !== 'v1' || !ivRaw || !tagRaw || !encryptedRaw) throw new Error('invalid_fiscal_secret')
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawKey))
+  const key = await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['decrypt'])
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: base64UrlBytes(ivRaw), tagLength: 128 }, key, concatBytes(base64UrlBytes(encryptedRaw), base64UrlBytes(tagRaw)))
+  return new TextDecoder().decode(decrypted)
+}
+async function sha256(value: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+function buildDetail(items: JsonObject[]) {
+  return items.map((item) => {
+    const qty = Number(item.quantity)
+    const netUnit = Number(item.unit_price)
+    const taxRate = Number(item.tax_rate)
+    const base = round2(qty * netUnit)
+    const tax = round2((base * taxRate) / 100)
+    return {
+      unidad: String(item.unit_code ?? 'NIU'), cantidad: qty, codProducto: `MGL-${item.line_number}`,
+      descripcion: String(item.description ?? ''), montoValorUnitario: netUnit, montoBaseIgv: base,
+      porcentajeIgv: taxRate, igv: tax, tipAfeIgv: String(item.tax_affectation_code ?? '10'), totalImpuestos: tax,
+      montoPrecioUnitario: round2(netUnit * (1 + taxRate / 100)), montoValorVenta: base,
+    }
+  })
+}
+
+function ublInvoiceXml(invoice: JsonObject, company: JsonObject, fiscal: JsonObject, detail: ReturnType<typeof buildDetail>) {
+  const gravadas = round2(detail.reduce((sum, row) => sum + row.montoValorVenta, 0))
+  const igv = round2(detail.reduce((sum, row) => sum + row.igv, 0))
+  const total = round2(gravadas + igv)
+  const seriesNumber = `${invoice.series}-${invoice.number}`
+  const currency = String(invoice.currency ?? 'PEN')
+  const ruc = String(company.ruc ?? '')
+  const legalName = escapeXml(company.legal_name)
+  const tradeName = escapeXml(fiscal.trade_name || company.legal_name)
+  const address = escapeXml(fiscal.issuer_address)
+  const ubigeo = escapeXml(fiscal.ubigeo)
+  const department = escapeXml(fiscal.department)
+  const province = escapeXml(fiscal.province)
+  const district = escapeXml(fiscal.district)
+  const establishment = escapeXml(fiscal.establishment_code || '0000')
+  const customerType = escapeXml(invoice.customer_document_type)
+  const customerNumber = escapeXml(invoice.customer_document_number)
+  const customerName = escapeXml(invoice.customer_name)
+  const customerAddress = escapeXml(invoice.customer_address)
+  const issueTime = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date())
+
+  const lines = detail.map((row, index) => `
+  <cac:InvoiceLine>
+    <cbc:ID>${index + 1}</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="${escapeXml(row.unidad)}" unitCodeListID="UN/ECE rec 20" unitCodeListAgencyName="United Nations Economic Commission for Europe">${row.cantidad.toFixed(4)}</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="${currency}">${row.montoValorVenta.toFixed(2)}</cbc:LineExtensionAmount>
+    <cac:PricingReference><cac:AlternativeConditionPrice><cbc:PriceAmount currencyID="${currency}">${row.montoPrecioUnitario.toFixed(6)}</cbc:PriceAmount><cbc:PriceTypeCode listName="Tipo de Precio" listAgencyName="PE:SUNAT" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo16">01</cbc:PriceTypeCode></cac:AlternativeConditionPrice></cac:PricingReference>
+    <cac:TaxTotal><cbc:TaxAmount currencyID="${currency}">${row.igv.toFixed(2)}</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="${currency}">${row.montoBaseIgv.toFixed(2)}</cbc:TaxableAmount><cbc:TaxAmount currencyID="${currency}">${row.igv.toFixed(2)}</cbc:TaxAmount><cac:TaxCategory><cbc:ID schemeID="UN/ECE 5305" schemeName="Tax Category Identifier" schemeAgencyName="United Nations Economic Commission for Europe">S</cbc:ID><cbc:Percent>${row.porcentajeIgv.toFixed(2)}</cbc:Percent><cbc:TaxExemptionReasonCode listAgencyName="PE:SUNAT" listName="Afectacion del IGV" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07">${escapeXml(row.tipAfeIgv)}</cbc:TaxExemptionReasonCode><cac:TaxScheme><cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">1000</cbc:ID><cbc:Name>IGV</cbc:Name><cbc:TaxTypeCode>VAT</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+    <cac:Item><cbc:Description><![CDATA[${String(row.descripcion).replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:Description></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="${currency}">${row.montoValorUnitario.toFixed(6)}</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>`).join('')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+  <ext:UBLExtensions><ext:UBLExtension><ext:ExtensionContent></ext:ExtensionContent></ext:UBLExtension></ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID schemeAgencyName="PE:SUNAT">2.0</cbc:CustomizationID>
+  <cbc:ProfileID schemeName="Tipo de Operacion" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo51">0101</cbc:ProfileID>
+  <cbc:ID>${escapeXml(seriesNumber)}</cbc:ID>
+  <cbc:IssueDate>${escapeXml(invoice.issued_on)}</cbc:IssueDate>
+  <cbc:IssueTime>${escapeXml(issueTime)}</cbc:IssueTime>
+  <cbc:InvoiceTypeCode listID="0101" listAgencyName="PE:SUNAT" listName="Tipo de Documento" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01">01</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode listID="ISO 4217 Alpha" listName="Currency" listAgencyName="United Nations Economic Commission for Europe">${currency}</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>${detail.length}</cbc:LineCountNumeric>
+  <cac:Signature><cbc:ID>${escapeXml(`IDSign-${seriesNumber}`)}</cbc:ID><cac:SignatoryParty><cac:PartyIdentification><cbc:ID>${ruc}</cbc:ID></cac:PartyIdentification><cac:PartyName><cbc:Name><![CDATA[${String(company.legal_name ?? '').replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:Name></cac:PartyName></cac:SignatoryParty><cac:DigitalSignatureAttachment><cac:ExternalReference><cbc:URI>${escapeXml(`#Signature-${seriesNumber}`)}</cbc:URI></cac:ExternalReference></cac:DigitalSignatureAttachment></cac:Signature>
+  <cac:AccountingSupplierParty><cac:Party><cac:PartyIdentification><cbc:ID schemeID="6" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">${ruc}</cbc:ID></cac:PartyIdentification><cac:PartyName><cbc:Name><![CDATA[${String(fiscal.trade_name || company.legal_name || '').replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:Name></cac:PartyName><cac:PartyTaxScheme><cbc:RegistrationName><![CDATA[${String(company.legal_name ?? '').replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:RegistrationName><cbc:CompanyID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">${ruc}</cbc:CompanyID><cac:TaxScheme><cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT">${ruc}</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName><![CDATA[${String(company.legal_name ?? '').replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:RegistrationName><cac:RegistrationAddress><cbc:ID schemeName="Ubigeos" schemeAgencyName="PE:INEI">${ubigeo}</cbc:ID><cbc:AddressTypeCode listAgencyName="PE:SUNAT" listName="Establecimientos anexos">${establishment}</cbc:AddressTypeCode><cbc:CityName>${province}</cbc:CityName><cbc:CountrySubentity>${department}</cbc:CountrySubentity><cbc:District>${district}</cbc:District><cac:AddressLine><cbc:Line>${address}</cbc:Line></cac:AddressLine><cac:Country><cbc:IdentificationCode listID="ISO 3166-1" listAgencyName="United Nations Economic Commission for Europe" listName="Country">PE</cbc:IdentificationCode></cac:Country></cac:RegistrationAddress></cac:PartyLegalEntity></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cac:PartyIdentification><cbc:ID schemeID="${customerType}" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">${customerNumber}</cbc:ID></cac:PartyIdentification><cac:PartyLegalEntity><cbc:RegistrationName><![CDATA[${String(invoice.customer_name ?? '').replace(/\]\]>/g, ']]]]><![CDATA[>')}]]></cbc:RegistrationName>${customerAddress ? `<cac:RegistrationAddress><cac:AddressLine><cbc:Line>${customerAddress}</cbc:Line></cac:AddressLine><cac:Country><cbc:IdentificationCode>PE</cbc:IdentificationCode></cac:Country></cac:RegistrationAddress>` : ''}</cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:PaymentTerms><cbc:ID>FormaPago</cbc:ID><cbc:PaymentMeansID>Contado</cbc:PaymentMeansID></cac:PaymentTerms>
+  <cac:TaxTotal><cbc:TaxAmount currencyID="${currency}">${igv.toFixed(2)}</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="${currency}">${gravadas.toFixed(2)}</cbc:TaxableAmount><cbc:TaxAmount currencyID="${currency}">${igv.toFixed(2)}</cbc:TaxAmount><cac:TaxCategory><cbc:ID schemeID="UN/ECE 5305" schemeName="Tax Category Identifier" schemeAgencyName="United Nations Economic Commission for Europe">S</cbc:ID><cac:TaxScheme><cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">1000</cbc:ID><cbc:Name>IGV</cbc:Name><cbc:TaxTypeCode>VAT</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="${currency}">${gravadas.toFixed(2)}</cbc:LineExtensionAmount><cbc:TaxInclusiveAmount currencyID="${currency}">${total.toFixed(2)}</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="${currency}">${total.toFixed(2)}</cbc:PayableAmount></cac:LegalMonetaryTotal>${lines}
+</Invoice>`
+}
+
+function pfxCredentials(pfxBase64: string, password: string) {
+  const der = forge.util.decode64(pfxBase64)
+  const p12 = forge.pkcs12.pkcs12FromAsn1(forge.asn1.fromDer(der), false, password)
+  const keyOid = forge.pki.oids.pkcs8ShroudedKeyBag
+  const plainKeyOid = forge.pki.oids.keyBag
+  const certOid = forge.pki.oids.certBag
+  const shrouded = p12.getBags({ bagType: keyOid })[keyOid] ?? []
+  const plain = p12.getBags({ bagType: plainKeyOid })[plainKeyOid] ?? []
+  const certs = p12.getBags({ bagType: certOid })[certOid] ?? []
+  const keyBag = shrouded[0] ?? plain[0]
+  const certBag = certs[0]
+  if (!keyBag?.key || !certBag?.cert) throw new Error('certificate_key_not_found')
+  return { privateKey: forge.pki.privateKeyToPem(keyBag.key), certificate: forge.pki.certificateToPem(certBag.cert) }
+}
+
+function signUbl(xml: string, privateKey: string, certificate: string, signatureId: string) {
+  const signer = new SignedXml({
+    privateKey,
+    publicCert: certificate,
+    getKeyInfoContent: SignedXml.getKeyInfoContent,
+    canonicalizationAlgorithm: 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
+    signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+  })
+  signer.addReference({
+    xpath: "/*",
+    digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+    transforms: ['http://www.w3.org/2000/09/xmldsig#enveloped-signature', 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315'],
+    isEmptyUri: true,
+  })
+  signer.computeSignature(xml, {
+    prefix: 'ds',
+    attrs: { Id: signatureId },
+    location: { reference: "//*[local-name(.)='ExtensionContent']", action: 'append' },
+    existingPrefixes: {
+      ext: 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
+      cac: 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
+      cbc: 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+    },
+  })
+  return signer.getSignedXml()
+}
+
+function soapEnvelope(username: string, password: string, fileName: string, zipBase64: string) {
+  return `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.sunat.gob.pe" xmlns:wsse="http://schemas.xmlsoap.org/ws/2002/12/secext"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>${escapeXml(username)}</wsse:Username><wsse:Password>${escapeXml(password)}</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><ser:sendBill><fileName>${escapeXml(fileName)}</fileName><contentFile>${zipBase64}</contentFile></ser:sendBill></soapenv:Body></soapenv:Envelope>`
+}
+function xmlTag(xml: string, localName: string) {
+  const match = xml.match(new RegExp(`<(?:[A-Za-z0-9_-]+:)?${localName}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/(?:[A-Za-z0-9_-]+:)?${localName}>`, 'i'))
+  return match?.[1]?.trim() ?? null
+}
+function decodeXmlText(value: string | null) {
+  return (value ?? '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&')
+}
+
+async function emitSunatDirect(admin: AdminClient, invoice: JsonObject, items: JsonObject[], company: JsonObject, fiscal: JsonObject) {
+  if (invoice.document_type !== '01') return { ok: false, status: 409, body: { error: 'boleta_requires_daily_summary', detail: 'SUNAT directo v0.16.0 emite facturas 01. Las boletas continúan por Intifact hasta implementar Resumen Diario.' } }
+  if (!invoice.series || invoice.number === null) return { ok: false, status: 409, body: { error: 'invoice_number_required' } }
+  if (!fiscal.certificate_pfx_enc) return { ok: false, status: 409, body: { error: 'sunat_certificate_required' } }
+  if (!fiscal.certificate_password_enc) return { ok: false, status: 409, body: { error: 'sunat_certificate_password_required' } }
+
+  const environment = fiscal.environment === 'production' ? 'production' : 'beta'
+  const solUser = fiscal.sol_user_enc ? await decryptSecret(String(fiscal.sol_user_enc)) : environment === 'beta' ? 'MODDATOS' : ''
+  const solPassword = fiscal.sol_password_enc ? await decryptSecret(String(fiscal.sol_password_enc)) : environment === 'beta' ? 'MODDATOS' : ''
+  if (!solUser || !solPassword) return { ok: false, status: 409, body: { error: 'sunat_sol_credentials_required' } }
+  const pfxBase64 = await decryptSecret(String(fiscal.certificate_pfx_enc))
+  const pfxPassword = await decryptSecret(String(fiscal.certificate_password_enc))
+
+  const detail = buildDetail(items)
+  const unsignedXml = ublInvoiceXml(invoice, company, fiscal, detail)
+  const { privateKey, certificate } = pfxCredentials(pfxBase64, pfxPassword)
+  const signatureId = `Signature-${invoice.series}-${invoice.number}`
+  const signedXml = signUbl(unsignedXml, privateKey, certificate, signatureId)
+  const digest = xmlTag(signedXml, 'DigestValue') ?? await sha256(signedXml)
+  const base = `${company.ruc}-01-${invoice.series}-${invoice.number}`
+  const xmlName = `${base}.xml`
+  const zipName = `${base}.zip`
+  const zip = new JSZip()
+  zip.file(xmlName, signedXml)
+  const zipBase64 = await zip.generateAsync({ type: 'base64', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+
+  await admin.from('invoices').update({
+    status: 'processing', emission_provider: 'sunat_direct', provider_status: `SUNAT_${environment.toUpperCase()}_ENVIANDO`,
+    sunat_xml: signedXml, sunat_digest: digest, last_error: null, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID(),
+  }).eq('id', invoice.id)
+
+  const endpoint = environment === 'production' ? SUNAT_PROD : SUNAT_BETA
+  const username = `${company.ruc}${solUser}`
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'content-type': 'text/xml; charset=utf-8', SOAPAction: '"sendBill"' },
+    body: soapEnvelope(username, solPassword, zipName, zipBase64),
+  })
+  const responseXml = await response.text()
+  const fault = decodeXmlText(xmlTag(responseXml, 'faultstring'))
+  if (!response.ok || fault) {
+    const message = fault || `SUNAT HTTP ${response.status}`
+    await admin.from('invoices').update({ status: response.status >= 400 && response.status < 500 ? 'rejected' : 'unknown', provider_status: 'SUNAT_ERROR', last_error: message, pse_response: { endpoint, environment, http_status: response.status, fault: message }, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoice.id)
+    return { ok: false, status: response.status >= 400 && response.status < 500 ? 400 : 502, body: { error: message, provider: 'sunat_direct' } }
+  }
+
+  const applicationResponse = xmlTag(responseXml, 'applicationResponse')
+  if (!applicationResponse) {
+    await admin.from('invoices').update({ status: 'unknown', provider_status: 'SUNAT_SIN_CDR', last_error: 'SUNAT no devolvió applicationResponse.', pse_response: { endpoint, environment, response: responseXml.slice(0, 4000) }, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoice.id)
+    return { ok: false, status: 502, body: { error: 'sunat_cdr_missing', provider: 'sunat_direct' } }
+  }
+
+  const cdrZip = await JSZip.loadAsync(applicationResponse.replace(/\s+/g, ''), { base64: true })
+  const cdrEntry = Object.values(cdrZip.files).find((entry) => !entry.dir && entry.name.toLowerCase().endsWith('.xml'))
+  if (!cdrEntry) throw new Error('sunat_cdr_xml_missing')
+  const cdrXml = await cdrEntry.async('string')
+  const cdrCode = decodeXmlText(xmlTag(cdrXml, 'ResponseCode')) || 'UNKNOWN'
+  const cdrDescription = decodeXmlText(xmlTag(cdrXml, 'Description')) || ''
+  const accepted = cdrCode === '0'
+
+  await admin.from('invoices').update({
+    status: accepted ? 'accepted' : 'rejected', emission_provider: 'sunat_direct', provider_status: accepted ? 'ACEPTADO' : 'RECHAZADO',
+    cdr_code: cdrCode, cdr_xml: cdrXml, sunat_cdr_zip_base64: applicationResponse.replace(/\s+/g, ''),
+    sunat_response_description: cdrDescription, accepted_at: accepted ? new Date().toISOString() : null,
+    last_error: accepted ? null : cdrDescription || `SUNAT código ${cdrCode}`,
+    pse_request_id: base, pse_response: { endpoint, environment, cdr_code: cdrCode, description: cdrDescription },
+    updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID(),
+  }).eq('id', invoice.id)
+
+  return { ok: accepted, status: accepted ? 200 : 400, body: { ok: accepted, provider: 'sunat_direct', environment, cdr_code: cdrCode, description: cdrDescription, digest } }
+}
+
+async function emitIntifact(admin: AdminClient, invoice: JsonObject, items: JsonObject[], company: JsonObject, apiKey: string) {
+  const detail = buildDetail(items)
+  const gravadas = round2(detail.reduce((sum, row) => sum + row.montoValorVenta, 0))
+  const igv = round2(detail.reduce((sum, row) => sum + row.igv, 0))
+  const total = round2(gravadas + igv)
+  const payload = {
+    empresaRuc: company.ruc, tipoDoc: invoice.document_type, serie: invoice.series, correlativo: String(invoice.number), tipoMoneda: invoice.currency,
+    fechaEmision: invoice.issued_on, tipoOperacion: '0101', establecimientoCodigo: '0000', clienteTipoDoc: invoice.customer_document_type,
+    clienteNumDoc: invoice.customer_document_number, clienteRazonSocial: invoice.customer_name, clienteDireccion: invoice.customer_address, detalle,
+    montoOperGravadas: gravadas, montoOperExoneradas: 0, montoOperInafectas: 0, montoOperGratuitas: 0, montoIgv: igv, totalImpuestos: igv,
+    valorVenta: gravadas, subTotal: total, montoImpVenta: total, formaPago: [{ tipo: 'Contado', monto: total, fechaPago: invoice.issued_on }],
+  }
+  const hash = await sha256(`${invoice.id}:${JSON.stringify(payload)}`)
+  if (invoice.intifact_idempotency_hash === hash && invoice.intifact_document_id) {
+    const providerStatus = String(invoice.provider_status ?? '').toUpperCase()
+    if (!providerStatus.includes('COLA_FALLIDA')) return { ok: true, status: 200, body: { ok: true, idempotent: true, provider: 'intifact', document_id: invoice.intifact_document_id, status: invoice.provider_status ?? invoice.status } }
+    const retryResponse = await fetch(`${INTIFACT_BASE}/api/v1/documents/${encodeURIComponent(String(invoice.intifact_document_id))}/retry`, { method: 'POST', headers: { authorization: `Bearer ${apiKey}` } })
+    const retryRaw = (await retryResponse.json().catch(() => ({}))) as unknown
+    const retryResult = isObject(retryRaw) ? retryRaw : {}
+    if (!retryResponse.ok || retryResult.success === false) return { ok: false, status: 502, body: { ok: false, error: typeof retryResult.message === 'string' ? retryResult.message : `Intifact retry HTTP ${retryResponse.status}`, provider: 'intifact' } }
+    await admin.from('invoices').update({ status: 'submitted', emission_provider: 'intifact', provider_status: 'ENCOLADO', pse_response: retryResult, last_error: null, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoice.id)
+    return { ok: true, status: 200, body: { ok: true, provider: 'intifact', retried: true, document_id: invoice.intifact_document_id, status: 'ENCOLADO' } }
+  }
+
+  await admin.from('invoices').update({ status: 'processing', emission_provider: 'intifact', intifact_idempotency_hash: hash, last_error: null, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoice.id)
+  const response = await fetch(`${INTIFACT_BASE}/api/v1/invoice/send`, { method: 'POST', headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json', 'idempotency-key': hash }, body: JSON.stringify(payload) })
+  const raw = (await response.json().catch(() => ({}))) as unknown
+  const result = isObject(raw) ? raw : {}
+  const data = isObject(result.data) ? result.data : result
+  const documentId = typeof data.id === 'string' ? data.id : typeof data.documentId === 'string' ? data.documentId : null
+  const providerStatus = typeof data.estado === 'string' ? data.estado : typeof data.estadoSunat === 'string' ? data.estadoSunat : typeof data.status === 'string' ? data.status : 'ENCOLADO'
+  const providerCdrCode = typeof data.codigoRespuesta === 'string' ? data.codigoRespuesta : typeof data.cdrCode === 'string' ? data.cdrCode : typeof data.cdr_code === 'string' ? data.cdr_code : null
+  if ((!response.ok || result.success === false) && response.status !== 409) {
+    const message = typeof result.message === 'string' ? result.message : `Intifact HTTP ${response.status}`
+    await admin.from('invoices').update({ status: response.status >= 400 && response.status < 500 ? 'rejected' : 'unknown', emission_provider: 'intifact', provider_status: 'ERROR', pse_response: result, last_error: message, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoice.id)
+    return { ok: false, status: response.status >= 400 && response.status < 500 ? 400 : 502, body: { ok: false, error: message, provider: 'intifact' } }
+  }
+  const acceptedByProvider = providerStatus.toUpperCase() === 'ACEPTADO' && Boolean(documentId)
+  await admin.from('invoices').update({
+    status: acceptedByProvider ? 'accepted' : providerStatus.toUpperCase() === 'RECHAZADO' ? 'rejected' : 'submitted',
+    emission_provider: 'intifact', intifact_document_id: documentId, provider_status: providerStatus, pse_request_id: documentId, pse_response: result,
+    cdr_code: acceptedByProvider ? (providerCdrCode ?? '0') : providerCdrCode,
+    accepted_at: acceptedByProvider ? new Date().toISOString() : null, last_error: null, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID(),
+  }).eq('id', invoice.id)
+  return { ok: true, status: 200, body: { ok: true, provider: 'intifact', document_id: documentId, status: providerStatus, hash } }
+}
+
+Deno.serve(async (req) => {
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
+  const auth = req.headers.get('authorization') ?? ''
+  if (!auth.toLowerCase().startsWith('bearer ')) return json({ error: 'authentication_required' }, 401)
+
+  const url = Deno.env.get('SUPABASE_URL')
+  const anon = Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY')
+  const service = Deno.env.get('SUPABASE_SECRET_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!url || !anon || !service) return json({ error: 'supabase_env_missing' }, 500)
+  const userClient = createClient(url, anon, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } })
+  const admin = createClient(url, service, { auth: { persistSession: false } })
+
+  const body = (await req.json().catch(() => null)) as unknown
+  const invoiceId = isObject(body) && typeof body.invoice_id === 'string' ? body.invoice_id : null
+  if (!invoiceId) return json({ error: 'invoice_id_required' }, 400)
+  const { data: invoice, error: invoiceError } = await userClient.from('invoices').select('*').eq('id', invoiceId).is('deleted_at', null).maybeSingle()
+  if (invoiceError) return json({ error: 'invoice_read_failed', detail: invoiceError.message }, 400)
+  if (!invoice) return json({ error: 'invoice_not_found' }, 404)
+  if (!['queued', 'processing', 'submitted', 'unknown'].includes(invoice.status)) return json({ error: 'invoice_not_queued' }, 409)
+  if (!invoice.series || invoice.number === null) return json({ error: 'invoice_number_required' }, 409)
+
+  const [{ data: items, error: itemsError }, { data: company, error: companyError }, fiscalResult] = await Promise.all([
+    userClient.from('invoice_items').select('*').eq('invoice_id', invoiceId).is('deleted_at', null).order('line_number'),
+    userClient.from('companies').select('ruc,legal_name').eq('id', invoice.company_id).single(),
+    admin.from('company_fiscal_settings').select('*').eq('company_id', invoice.company_id).maybeSingle(),
+  ])
+  if (itemsError || companyError) return json({ error: 'invoice_data_failed', detail: itemsError?.message ?? companyError?.message }, 400)
+  if (!items?.length) return json({ error: 'invoice_items_required' }, 409)
+
+  const fiscal = fiscalResult.error ? null : fiscalResult.data
+  if (!fiscal?.drive_enabled || !fiscal?.drive_cloud_account_id) {
+    return json({
+      error: 'fiscal_drive_required',
+      detail: 'Conecta Google Drive y activa el archivo fiscal en Configuración → Facturación antes de emitir.',
+    }, 409)
+  }
+  const provider = fiscal?.provider === 'sunat_direct' ? 'sunat_direct' : 'intifact'
+  try {
+    if (provider === 'sunat_direct' && invoice.document_type === '01') {
+      const result = await emitSunatDirect(admin, invoice as JsonObject, items as JsonObject[], company as JsonObject, fiscal as JsonObject)
+      return json(result.body, result.status)
+    }
+    const apiKey = Deno.env.get('INTIFACT_API_KEY')
+    if (!apiKey) {
+      if (provider === 'sunat_direct' && invoice.document_type === '03') return json({ error: 'boleta_requires_daily_summary', detail: 'Configura Intifact para boletas mientras se implementa Resumen Diario SUNAT.' }, 409)
+      return json({ error: 'intifact_not_configured' }, 503)
+    }
+    const result = await emitIntifact(admin, invoice as JsonObject, items as JsonObject[], company as JsonObject, apiKey)
+    return json(result.body, result.status)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'emission_failed'
+    await admin.from('invoices').update({ status: 'unknown', provider_status: 'ERROR', last_error: message, updated_at: new Date().toISOString(), mutation_id: crypto.randomUUID() }).eq('id', invoiceId)
+    return json({ ok: false, error: message, provider }, 502)
+  }
 })

@@ -15,13 +15,13 @@ import { roleLabels, type MyWorkspaceInvitation } from './types'
 export function InvitationAcceptance({ invitation, initialFullName = '' }: { invitation: MyWorkspaceInvitation; initialFullName?: string }) {
   const [state, action] = useActionState<FormActionState, FormData>(acceptWorkspaceInvitationAction, initialFormState)
   return (
-    <div className="space-y-6">
-      <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-5">
+    <div className="space-y-8">
+      <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-6">
         <div className="flex items-start gap-4">
           <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-cyan-400/10 text-cyan-300"><Building2 className="size-5" /></span>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Invitación de workspace</p>
-            <h2 className="mt-1 text-xl font-semibold text-white">{invitation.company_name}</h2>
+            <h2 className="mt-1 text-lg font-medium tracking-tight text-white">{invitation.company_name}</h2>
             <p className="mt-2 text-sm text-slate-400">{invitation.email}</p>
             <div className="mt-3"><Badge>{roleLabels[invitation.role]}</Badge></div>
           </div>
@@ -29,7 +29,7 @@ export function InvitationAcceptance({ invitation, initialFullName = '' }: { inv
       </div>
 
       {invitation.projects.length > 0 ? (
-        <div className="rounded-xl border border-slate-800 p-5">
+        <div className="rounded-xl border border-slate-800 p-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-200"><Users className="size-4 text-cyan-300" />Proyectos asignados</div>
           <div className="mt-3 space-y-2">{invitation.projects.map((project) => <div key={project.id} className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2 text-sm"><span className="text-slate-300">{project.name}</span><span className="text-xs text-slate-500">{project.code}</span></div>)}</div>
         </div>

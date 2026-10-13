@@ -168,10 +168,10 @@ export function SubscriptionManager({
     window.location.reload()
   }
 
-  return <div className="space-y-6">
+  return <div className="space-y-8">
     <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" />
 
-    {subscription ? <div className="rounded-xl border border-slate-200 bg-white p-5">
+    {subscription ? <div className="rounded-xl border border-slate-200 bg-white p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">Plan actual</p>
@@ -195,9 +195,9 @@ export function SubscriptionManager({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        {visiblePlans.map((plan) => <button key={plan.id} type="button" onClick={() => setSelectedPlanId(plan.id)} className={`rounded-xl border bg-white p-5 text-left shadow-sm ${selectedPlan?.id === plan.id ? 'border-blue-600 ring-2 ring-blue-600/10' : 'border-slate-200'}`}>
-          <div className="flex items-center justify-between gap-3"><h3 className="font-semibold text-slate-950">{plan.name}</h3>{selectedPlan?.id === plan.id ? <Check className="size-5 text-blue-600" /> : null}</div>
-          <p className="mt-3 text-2xl font-semibold text-slate-950">{money(plan.priceCents, plan.currency)}</p>
+        {visiblePlans.map((plan) => <button key={plan.id} type="button" onClick={() => setSelectedPlanId(plan.id)} className={`rounded-xl border bg-white p-6 text-left shadow-sm ${selectedPlan?.id === plan.id ? 'border-blue-600 ring-2 ring-blue-600/10' : 'border-slate-200'}`}>
+          <div className="flex items-center justify-between gap-3"><h3 className="text-sm font-medium text-slate-700">{plan.name}</h3>{selectedPlan?.id === plan.id ? <Check className="size-5 text-blue-600" /> : null}</div>
+          <p className="mt-3 text-3xl font-semibold tabular-nums text-slate-950">{money(plan.priceCents, plan.currency)}</p>
           <p className="text-xs text-slate-500">/{plan.billingInterval === 'year' ? 'año' : 'mes'}</p>
           <div className="mt-4 space-y-1.5 text-sm text-slate-600">
             <p>{plan.maxProjects === null ? 'Proyectos ilimitados' : `${plan.maxProjects} proyectos`}</p>
@@ -207,8 +207,8 @@ export function SubscriptionManager({
         </button>)}
       </div>
 
-      <form ref={formRef} className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="mb-5 flex items-center gap-2"><CreditCard className="size-5 text-blue-600" /><h3 className="font-semibold text-slate-950">Datos de facturación</h3></div>
+      <form ref={formRef} className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="mb-5 flex items-center gap-2"><CreditCard className="size-5 text-blue-600" /><h3 className="text-sm font-medium text-slate-700">Datos de facturación</h3></div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2"><Label htmlFor="first_name">Nombre</Label><Input id="first_name" name="first_name" defaultValue={defaultFirstName} required minLength={2} maxLength={50} /></div>
           <div className="space-y-2"><Label htmlFor="last_name">Apellido</Label><Input id="last_name" name="last_name" defaultValue={defaultLastName} required minLength={2} maxLength={50} /></div>
@@ -223,9 +223,9 @@ export function SubscriptionManager({
       </form>
     </> : null}
 
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <h3 className="font-semibold text-slate-950">Pagos</h3>
-      {payments.length ? <div className="mt-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-slate-200 text-left text-xs text-slate-500"><th className="py-2 pr-4">Fecha</th><th className="py-2 pr-4">Monto</th><th className="py-2 pr-4">Estado</th><th className="py-2">Tarjeta</th></tr></thead><tbody>{payments.map((payment) => <tr key={payment.id} className="border-b border-slate-100 last:border-0"><td className="py-3 pr-4">{date(payment.paidAt ?? payment.createdAt)}</td><td className="py-3 pr-4">{money(payment.amountCents, payment.currency)}</td><td className="py-3 pr-4">{payment.status === 'paid' ? 'Pagado' : payment.status === 'failed' ? 'Fallido' : payment.status}</td><td className="py-3">{payment.cardBrand ?? 'Tarjeta'} {payment.cardLastFour ? `•••• ${payment.cardLastFour}` : ''}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-sm text-slate-500">Sin pagos</p>}
+    <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <h3 className="text-sm font-medium text-slate-700">Pagos</h3>
+      {payments.length ? <div className="mgl-table-scroll mt-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-slate-200 text-left text-xs text-slate-500"><th className="py-2 pr-4">Fecha</th><th className="py-2 pr-4">Monto</th><th className="py-2 pr-4">Estado</th><th className="py-2">Tarjeta</th></tr></thead><tbody>{payments.map((payment) => <tr key={payment.id} className="border-b border-slate-100 last:border-0"><td className="py-3 pr-4">{date(payment.paidAt ?? payment.createdAt)}</td><td className="py-3 pr-4">{money(payment.amountCents, payment.currency)}</td><td className="py-3 pr-4">{payment.status === 'paid' ? 'Pagado' : payment.status === 'failed' ? 'Fallido' : payment.status}</td><td className="py-3">{payment.cardBrand ?? 'Tarjeta'} {payment.cardLastFour ? `•••• ${payment.cardLastFour}` : ''}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-sm text-slate-500">Sin pagos</p>}
     </div>
   </div>
 }

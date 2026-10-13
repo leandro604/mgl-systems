@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireWorkspaceContext } from '@/features/auth/server'
 import { canManageFinance } from '@/features/purchases/server'
-import { generateInvoicePdf, type PrintableInvoice } from '@/features/invoices/pdf'
+import { generateInvoicePdf, normalizeInvoicePdfFormat, type InvoicePdfFormat, type PrintableInvoice } from '@/features/invoices/pdf'
+import { getInvoiceDriveAsset } from '@/features/invoices/drive-storage'
 import { fiscalAdminClient } from '@/features/fiscal/server'
 import { bankAccountsSchema, digitalWalletsSchema, emailsSchema, normalizeStoredArray, phonesSchema } from '@/features/fiscal/branding'
 
@@ -34,7 +35,7 @@ async function intifactAsset(documentId: string, asset: string) {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ invoiceId: string; asset: string }> },
 ) {
   const { invoiceId, asset } = await params
@@ -56,6 +57,46 @@ export async function GET(
   }
 
   const name = fileBase(invoice.series, invoice.number, invoice.id)
+  let driveError: string | null = null
+  let pdfFormat: InvoicePdfFormat = invoice.document_type === '03' ? 'ticket80' : 'a4'
+  if (asset === 'pdf') {
+    try {
+      const { data: formatSettings } = await fiscalAdminClient()
+        .from('company_fiscal_settings')
+        .select('invoice_pdf_format,receipt_pdf_format')
+        .eq('company_id', context.company.id)
+        .maybeSingle()
+      const configured = invoice.document_type === '03' ? formatSettings?.receipt_pdf_format : formatSettings?.invoice_pdf_format
+      pdfFormat = normalizeInvoicePdfFormat(request.nextUrl.searchParams.get('format'), normalizeInvoicePdfFormat(configured, pdfFormat))
+      const archived = await getInvoiceDriveAsset({ companyId: context.company.id, invoiceId: invoice.id, assetType: 'pdf', pdfFormat })
+      if (archived) {
+        return new NextResponse(Uint8Array.from(archived.bytes).buffer, {
+          headers: {
+            'content-type': archived.contentType || archived.mimeType || 'application/pdf',
+            'content-disposition': `attachment; filename="${archived.fileName}"`,
+            'cache-control': 'private, no-store',
+          },
+        })
+      }
+    } catch (error) {
+      driveError = error instanceof Error ? error.message : 'No se pudo leer el PDF desde Google Drive.'
+    }
+  } else {
+    try {
+      const archived = await getInvoiceDriveAsset({ companyId: context.company.id, invoiceId: invoice.id, assetType: asset as 'xml' | 'cdr' })
+      if (archived) {
+        return new NextResponse(Uint8Array.from(archived.bytes).buffer, {
+          headers: {
+            'content-type': archived.contentType || archived.mimeType,
+            'content-disposition': `attachment; filename="${archived.fileName}"`,
+            'cache-control': 'private, no-store',
+          },
+        })
+      }
+    } catch (error) {
+      driveError = error instanceof Error ? error.message : 'No se pudo leer el archivo desde Google Drive.'
+    }
+  }
 
   if (asset === 'pdf') {
     const [{ data: items, error: itemsError }, { data: total, error: totalError }] = await Promise.all([
@@ -147,11 +188,11 @@ export async function GET(
       emissionProvider: invoice.emission_provider,
       sunatDigest: invoice.sunat_digest,
     }
-    const bytes = await generateInvoicePdf(printable, invoice.status !== 'accepted')
+    const bytes = await generateInvoicePdf(printable, invoice.status !== 'accepted', pdfFormat)
     return new NextResponse(Uint8Array.from(bytes).buffer, {
       headers: {
         'content-type': 'application/pdf',
-        'content-disposition': `attachment; filename="${name}.pdf"`,
+        'content-disposition': `attachment; filename="${name}${pdfFormat === 'a4' ? '' : `-${pdfFormat}`}.pdf"`,
         'cache-control': 'private, no-store',
       },
     })
@@ -200,5 +241,6 @@ export async function GET(
     })
   }
 
+  if (driveError) return NextResponse.json({ error: 'drive_asset_unavailable', detail: driveError }, { status: 502 })
   return NextResponse.json({ error: `${asset}_unavailable` }, { status: 404 })
 }

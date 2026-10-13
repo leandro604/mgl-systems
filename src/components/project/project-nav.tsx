@@ -34,13 +34,13 @@ const items: Item[] = [
 export function ProjectNav({ projectId, role }: { projectId: string; role: AppRole }) {
   const visibleItems = items.filter((item) => !item.roles || item.roles.includes(role))
   return (
-    <nav className="mgl-project-nav flex gap-2 overflow-x-auto border-b border-slate-200 pb-3" aria-label="Módulos del proyecto">
+    <nav className="mgl-project-nav mgl-hide-scrollbar -mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain border-b border-slate-200 px-3 pb-3 sm:mx-0 sm:px-0" aria-label="Módulos del proyecto">
       {visibleItems.map(({ slug, label, icon: Icon }) => (
         <Link
           key={slug || 'overview'}
           href={`/app/projects/${projectId}${slug}`}
           prefetch
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition-colors duration-150 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+          className="inline-flex min-h-10 shrink-0 snap-start items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition-colors duration-150 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
         >
           <Icon className="size-4" strokeWidth={1.5} />
           {label}

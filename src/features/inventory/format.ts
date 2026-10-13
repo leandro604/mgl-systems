@@ -16,10 +16,10 @@ export const movementLabel: Record<string, string> = {
 }
 
 export function inventoryStatusClass(status: string) {
-  if (['approved', 'fulfilled', 'posted'].includes(status)) return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-  if (['submitted', 'draft'].includes(status)) return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-  if (['rejected', 'cancelled'].includes(status)) return 'border-red-400/20 bg-red-400/10 text-red-200'
-  return 'border-slate-700 bg-slate-800 text-slate-300'
+  if (['approved', 'posted'].includes(status)) return 'border-green-200 bg-green-50 text-green-700'
+  if (['submitted'].includes(status)) return 'border-blue-200 bg-blue-50 text-blue-700'
+  if (['rejected'].includes(status)) return 'border-red-200 bg-red-50 text-red-700'
+  return 'border-slate-200 bg-slate-100 text-slate-600'
 }
 
 export function stockHealth(quantity: number, minStock: number) {

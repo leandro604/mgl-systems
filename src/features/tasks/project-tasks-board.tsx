@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CirclePlus,
   Layers3,
-  Link2,
   LoaderCircle,
   RefreshCw,
   Trash2,
@@ -13,7 +12,7 @@ import {
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Chip } from '@/components/ui/chip'
+import { Drawer } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { resolveOperationalRuntime, syncOperationalRuntimeNow, type OperationalRuntime } from '@/features/operations-local-runtime'
@@ -99,6 +98,8 @@ export function ProjectTasksBoard({
   const [newTaskStageId, setNewTaskStageId] = useState<string>(stages[0]?.id ?? '')
   const [newTaskBudgetItemId, setNewTaskBudgetItemId] = useState<string>('')
   const [message, setMessage] = useState<string>('')
+  const [newTaskOpen, setNewTaskOpen] = useState(false)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
   const [online, setOnline] = useState(true)
@@ -249,6 +250,7 @@ export function ProjectTasksBoard({
 
       formRef.current?.reset()
       setNewTaskBudgetItemId('')
+      setNewTaskOpen(false)
       await syncAfterWrite(runtime, 'Tarea creada y sincronizada con Supabase.')
       const current = await runtime.db.tasks.get(created.id)
       await refresh()
@@ -363,343 +365,68 @@ export function ProjectTasksBoard({
     }
   }
 
+  const selectedTask = selectedTaskId ? tasks.find((task) => task.id === selectedTaskId) ?? null : null
+  const selectedDependencies = selectedTask ? dependencies.filter((dep) => dep.task_id === selectedTask.id && dep.deleted_at === null) : []
+
   return (
-    <div className="space-y-6">
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-          <div>
-            <div className="flex items-center gap-2">
-              <Layers3 className="size-4 text-blue-600" strokeWidth={1.5} />
-              <h2 className="text-lg font-medium text-slate-950">Kanban por etapa</h2>
-            </div>
-            <p className="mt-1 text-sm text-slate-500">
-              Filtra el tablero sin perder el estado local-first de las tareas.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            {!online ? <WifiOff className="size-4 text-amber-500" /> : null}
-            <span>{filteredTasks.length} tarea(s) visibles</span>
+    <div className="space-y-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2"><Layers3 className="size-4 text-blue-600" strokeWidth={1.5}/><h2 className="text-lg font-medium tracking-tight text-slate-950">Kanban por etapa</h2></div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-slate-400">{filteredTasks.length} tareas</span>
+            {!online ? <WifiOff className="size-4 text-amber-500"/> : null}
+            <Button type="button" onClick={() => setNewTaskOpen(true)}><CirclePlus/>Nueva tarea</Button>
           </div>
         </div>
-
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          <Chip selected={stageFilter === ALL_STAGES} onClick={() => chooseFilter(ALL_STAGES)}>
-            Todas · {tasks.length}
-          </Chip>
-          {stages.map((stage) => {
-            const count = tasks.filter((task) => task.stage_id === stage.id).length
-            return (
-              <Chip
-                key={stage.id}
-                selected={stageFilter === stage.id}
-                onClick={() => chooseFilter(stage.id)}
-              >
-                {stageLabel(stage)} · {count}
-              </Chip>
-            )
-          })}
+        <div className="mt-4 max-w-sm">
+          <Label htmlFor="stage-filter">Filtrar por etapa</Label>
+          <select id="stage-filter" value={stageFilter} onChange={(event)=>chooseFilter(event.target.value)} className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700">
+            <option value={ALL_STAGES}>Todas · {tasks.length}</option>
+            {stages.map((stage)=><option key={stage.id} value={stage.id}>{stageLabel(stage)} · {tasks.filter((task)=>task.stage_id===stage.id).length}</option>)}
+          </select>
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
-        <form
-          ref={formRef}
-          action={createTask}
-          className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <div>
-            <h2 className="text-lg font-medium text-slate-950">Nueva tarea</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              La etapa es obligatoria. La partida es opcional y debe pertenecer a la misma etapa.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="task-title">Título</Label>
-            <Input
-              id="task-title"
-              name="title"
-              required
-              maxLength={250}
-              placeholder="Título"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="task-description">Descripción</Label>
-            <textarea
-              id="task-description"
-              name="description"
-              rows={3}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-              placeholder="Descripción"
-            />
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="space-y-2 text-xs font-semibold text-slate-700">
-              Etapa *
-              <select
-                name="stage_id"
-                required
-                value={newTaskStageId}
-                onChange={(event) => {
-                  setNewTaskStageId(event.target.value)
-                  setNewTaskBudgetItemId('')
-                }}
-                className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
-              >
-                <option value="" disabled>Seleccionar etapa…</option>
-                {stages.map((stage) => (
-                  <option key={stage.id} value={stage.id}>{stageLabel(stage)}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-2 text-xs font-semibold text-slate-700">
-              Partida opcional
-              <select
-                name="budget_item_id"
-                value={newTaskBudgetItemId}
-                onChange={(event) => setNewTaskBudgetItemId(event.target.value)}
-                className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
-              >
-                <option value="">Sin partida vinculada</option>
-                {availableBudgetItems.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.code} · {item.description}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="space-y-2 text-xs font-semibold text-slate-700">
-              Prioridad
-              <select
-                name="priority"
-                defaultValue="2"
-                className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
-              >
-                <option value="1">Baja</option>
-                <option value="2">Media</option>
-                <option value="3">Alta</option>
-                <option value="4">Crítica</option>
-              </select>
-            </label>
-
-            <label className="space-y-2 text-xs font-semibold text-slate-700">
-              Responsable
-              <select
-                name="assignee_id"
-                className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
-              >
-                <option value="">Sin asignar</option>
-                {members.map((member) => (
-                  <option key={member.user_id} value={member.user_id}>{member.full_name}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Inicio</Label>
-              <Input name="starts_on" type="date" />
-            </div>
-            <div className="space-y-2">
-              <Label>Vencimiento</Label>
-              <Input name="due_on" type="date" />
-            </div>
-          </div>
-
-          <Button type="submit" disabled={busy || !newTaskStageId}>
-            <CirclePlus />
-            {busy ? 'Guardando…' : 'Crear tarea'}
-          </Button>
-        </form>
-
-        <div className="mgl-dependencies-panel p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-medium text-slate-950">Dependencias</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Define qué tarea debe terminar antes que otra.
-              </p>
-            </div>
-            <Link2 className="size-4 text-blue-600" strokeWidth={1.5} />
-          </div>
-
-          <form action={addDependency} className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_1fr_auto] md:items-end">
-            <label className="text-xs font-semibold text-slate-700">
-              Tarea
-              <select name="task_id" required className="mt-2 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900">
-                <option value="">Seleccionar…</option>
-                {tasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}
-              </select>
-            </label>
-            <span className="hidden pb-2 text-xs text-slate-500 md:block">depende de</span>
-            <label className="text-xs font-semibold text-slate-700">
-              Predecesora
-              <select name="depends_on_task_id" required className="mt-2 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900">
-                <option value="">Seleccionar…</option>
-                {tasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}
-              </select>
-            </label>
-            <Button type="submit" variant="secondary" size="sm" disabled={busy || tasks.length < 2}>
-              Vincular
-            </Button>
-          </form>
-
-          <div className="mt-5 space-y-2">
-            {dependencies.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center text-sm text-slate-500">
-                No hay dependencias activas.
-              </p>
-            ) : dependencies.map((dep) => (
-              <div key={dep.id} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-                <span className="min-w-0 flex-1 truncate text-slate-700">
-                  <strong className="font-semibold text-slate-900">{taskName.get(dep.task_id) ?? 'Tarea'}</strong>
-                  {' '}depende de {taskName.get(dep.depends_on_task_id) ?? 'otra tarea'}
-                </span>
-                {dep.pending_sync ? <Badge variant="warning">Pendiente</Badge> : null}
-                <Button type="button" size="icon" variant="ghost" onClick={() => void removeDependency(dep.id)} disabled={busy}>
-                  <Trash2 />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {message ? (
-        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-          {busy ? <LoaderCircle className="size-4 animate-spin text-blue-600" /> : !online ? <WifiOff className="size-4 text-amber-500" /> : null}
-          {message}
-        </div>
-      ) : null}
+      {message ? <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">{busy ? <LoaderCircle className="size-4 animate-spin text-blue-600"/> : !online ? <WifiOff className="size-4 text-amber-500"/> : null}{message}</div> : null}
 
       <section className="grid gap-4 xl:grid-cols-4">
-        {columns.map((column) => {
-          const items = filteredTasks.filter((task) => task.status === column.key && task.deleted_at === null)
-
-          return (
-            <div key={column.key} className="min-h-64 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="mb-3 flex items-center justify-between px-1">
-                <h3 className="text-sm font-semibold text-slate-700">{column.label}</h3>
-                <Badge>{items.length}</Badge>
-              </div>
-
-              <div className="space-y-3">
-                {items.map((task) => {
-                  const stage = task.stage_id ? stageById.get(task.stage_id) : undefined
-                  const budgetItem = task.budget_item_id ? budgetItemById.get(task.budget_item_id) : undefined
-                  const taskBusy = busyTaskId === task.id
-
-                  return (
-                    <article id={`task-${task.id}`} key={task.id} className={cn('rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-shadow', focusedTaskId === task.id && 'border-blue-300 ring-2 ring-blue-200 ring-offset-2') }>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-semibold text-slate-900">{task.title}</h4>
-                          <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
-                            {task.description || 'Sin descripción'}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1">
-                          {task.sync_error ? (
-                            <Badge variant="danger" title={task.sync_error}>Error sync</Badge>
-                          ) : task.pending_sync ? (
-                            <Badge variant="warning" className="gap-1">
-                              <RefreshCw className="size-3 animate-spin" />
-                              Pendiente
-                            </Badge>
-                          ) : (
-                            <Badge variant="success">Sync</Badge>
-                          )}
-                          {(task.pending_sync || task.sync_error) ? (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-[11px]"
-                              disabled={taskBusy || !online}
-                              onClick={() => void retryTaskSync(task.id)}
-                              title={task.sync_error ?? 'Forzar sincronización ahora'}
-                            >
-                              <RefreshCw className={cn('size-3', taskBusy && 'animate-spin')} />
-                              Reintentar
-                            </Button>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {stage ? <Badge variant="info">{stage.code} · {stage.name.replace(/^\s*[^_]+_/, '')}</Badge> : <Badge variant="danger">Sin etapa</Badge>}
-                        {budgetItem ? <Badge>{budgetItem.code}</Badge> : null}
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                        <span>{priorityLabel[task.priority]}</span>
-                        {task.assignee_id ? <span>· {memberName.get(task.assignee_id) ?? 'Responsable'}</span> : null}
-                        {task.due_on ? <span>· vence {task.due_on}</span> : null}
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="mb-1 flex justify-between text-[11px] text-slate-500">
-                          <span>Progreso</span>
-                          <span>{task.progress}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="10"
-                          value={task.progress}
-                          onChange={(event) => void updateProgress(task, Number(event.target.value))}
-                          disabled={taskBusy}
-                          className="w-full accent-blue-600"
-                        />
-                      </div>
-
-                      <div className="mt-4 flex gap-2">
-                        <select
-                          value={task.status}
-                          onChange={(event) => void moveTask(task, event.target.value as typeof task.status)}
-                          disabled={taskBusy}
-                          className="h-9 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 text-xs text-slate-700"
-                        >
-                          <option value="todo">Por hacer</option>
-                          <option value="in_progress">En curso</option>
-                          <option value="blocked">Bloqueada</option>
-                          <option value="done">Terminada</option>
-                        </select>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          disabled={taskBusy}
-                          onClick={() => void removeTask(task.id)}
-                          title="Archivar"
-                        >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    </article>
-                  )
-                })}
-
-                {items.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-center text-xs text-slate-500">
-                    Sin tareas en esta columna
-                  </div>
-                ) : null}
-              </div>
+        {columns.map((column)=>{
+          const items=filteredTasks.filter((task)=>task.status===column.key&&task.deleted_at===null)
+          return <div key={column.key} className="min-h-64 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-4 flex items-center justify-between"><h3 className="text-sm font-medium text-slate-700">{column.label}</h3><Badge>{items.length}</Badge></div>
+            <div className="space-y-3">
+              {items.map((task)=>{const stage=task.stage_id?stageById.get(task.stage_id):undefined;const budgetItem=task.budget_item_id?budgetItemById.get(task.budget_item_id):undefined;const taskBusy=busyTaskId===task.id;return <article id={`task-${task.id}`} key={task.id} className={cn('rounded-lg border border-slate-200 bg-white p-4 shadow-sm',focusedTaskId===task.id&&'border-blue-300 ring-2 ring-blue-200 ring-offset-2')}>
+                <div className="flex items-start justify-between gap-3"><button type="button" onClick={()=>setSelectedTaskId(task.id)} className="min-w-0 flex-1 text-left"><h4 className="text-sm font-medium text-slate-900">{task.title}</h4><p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-400">{task.description||'Sin descripción'}</p></button><div className="flex flex-col items-end gap-1">{task.sync_error?<Badge variant="danger">Error sync</Badge>:task.pending_sync?<Badge variant="warning"><RefreshCw className="mr-1 size-3 animate-spin"/>Pendiente</Badge>:null}{(task.pending_sync||task.sync_error)?<Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={taskBusy||!online} onClick={()=>void retryTaskSync(task.id)}><RefreshCw className={cn('size-3',taskBusy&&'animate-spin')}/>Reintentar</Button>:null}</div></div>
+                <div className="mt-3 flex flex-wrap gap-2">{stage?<Badge variant="info">{stage.code}</Badge>:<Badge variant="danger">Sin etapa</Badge>}{budgetItem?<Badge>{budgetItem.code}</Badge>:null}</div>
+                <div className="mt-3 text-xs text-slate-400">{priorityLabel[task.priority]}{task.assignee_id?` · ${memberName.get(task.assignee_id)??'Responsable'}`:''}{task.due_on?` · ${task.due_on}`:''}</div>
+                <div className="mt-4"><div className="mb-1 flex justify-between text-xs text-slate-400"><span>Progreso</span><span className="tabular-nums">{task.progress}%</span></div><input type="range" min="0" max="100" step="10" value={task.progress} onChange={(event)=>void updateProgress(task,Number(event.target.value))} disabled={taskBusy} className="w-full accent-blue-600"/></div>
+                <div className="mt-4 flex gap-2"><select value={task.status} onChange={(event)=>void moveTask(task,event.target.value as typeof task.status)} disabled={taskBusy} className="h-9 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-700"><option value="todo">Por hacer</option><option value="in_progress">En curso</option><option value="blocked">Bloqueada</option><option value="done">Terminada</option></select><Button type="button" variant="ghost" size="icon" disabled={taskBusy} onClick={()=>void removeTask(task.id)} title="Archivar"><Trash2/></Button></div>
+              </article>})}
+              {!items.length?<div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-xs text-slate-400">Sin tareas</div>:null}
             </div>
-          )
+          </div>
         })}
       </section>
+
+      <Drawer open={newTaskOpen} onOpenChange={setNewTaskOpen} title="Nueva tarea">
+        <form ref={formRef} action={createTask} className="space-y-4">
+          <div className="space-y-2"><Label htmlFor="task-title">Título</Label><Input id="task-title" name="title" required maxLength={250} placeholder="Título"/></div>
+          <div className="space-y-2"><Label htmlFor="task-description">Descripción</Label><textarea id="task-description" name="description" rows={3} className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500" placeholder="Descripción"/></div>
+          <div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">Etapa *<select name="stage_id" required value={newTaskStageId} onChange={(event)=>{setNewTaskStageId(event.target.value);setNewTaskBudgetItemId('')}} className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm"><option value="" disabled>Seleccionar etapa…</option>{stages.map((stage)=><option key={stage.id} value={stage.id}>{stageLabel(stage)}</option>)}</select></label><label className="text-sm font-medium text-slate-700">Partida<select name="budget_item_id" value={newTaskBudgetItemId} onChange={(event)=>setNewTaskBudgetItemId(event.target.value)} className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm"><option value="">Sin partida</option>{availableBudgetItems.map((item)=><option key={item.id} value={item.id}>{item.code} · {item.description}</option>)}</select></label></div>
+          <div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">Prioridad<select name="priority" defaultValue="2" className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm"><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option><option value="4">Crítica</option></select></label><label className="text-sm font-medium text-slate-700">Responsable<select name="assignee_id" className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm"><option value="">Sin asignar</option>{members.map((member)=><option key={member.user_id} value={member.user_id}>{member.full_name}</option>)}</select></label></div>
+          <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label>Inicio</Label><Input name="starts_on" type="date"/></div><div className="space-y-2"><Label>Vencimiento</Label><Input name="due_on" type="date"/></div></div>
+          <Button type="submit" disabled={busy||!newTaskStageId} className="w-full"><CirclePlus/>{busy?'Guardando…':'Crear tarea'}</Button>
+        </form>
+      </Drawer>
+
+      <Drawer open={Boolean(selectedTask)} onOpenChange={(open)=>{if(!open)setSelectedTaskId(null)}} title={selectedTask?.title??'Detalle de tarea'}>
+        {selectedTask?<div className="space-y-8">
+          <div><p className="text-sm text-slate-600">{selectedTask.description||'Sin descripción'}</p><div className="mt-3 flex flex-wrap gap-2"><Badge variant="info">{stageById.get(selectedTask.stage_id??'')?.code??'—'}</Badge><span className="text-xs text-slate-400">{selectedTask.progress}% · {priorityLabel[selectedTask.priority]}</span></div></div>
+          <section><h3 className="mb-4 text-sm font-medium text-slate-700">Dependencias</h3><form action={addDependency} className="space-y-3"><input type="hidden" name="task_id" value={selectedTask.id}/><label className="text-sm font-medium text-slate-700">Predecesora<select name="depends_on_task_id" required className="mt-2 h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm"><option value="">Seleccionar…</option>{tasks.filter((task)=>task.id!==selectedTask.id).map((task)=><option key={task.id} value={task.id}>{task.title}</option>)}</select></label><Button type="submit" variant="secondary" disabled={busy||tasks.length<2}>Vincular</Button></form><div className="mt-4 divide-y divide-slate-100 border-y border-slate-100">{selectedDependencies.map((dep)=><div key={dep.id} className="flex items-center gap-3 py-3 text-sm"><span className="min-w-0 flex-1 truncate text-slate-600">Depende de <strong className="font-medium text-slate-900">{taskName.get(dep.depends_on_task_id)??'Tarea'}</strong></span><Button type="button" size="icon" variant="ghost" onClick={()=>void removeDependency(dep.id)} disabled={busy}><Trash2/></Button></div>)}{!selectedDependencies.length?<p className="py-4 text-sm text-slate-400">Sin dependencias.</p>:null}</div></section>
+        </div>:null}
+      </Drawer>
     </div>
   )
+
 }

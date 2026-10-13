@@ -22,8 +22,8 @@ export function AuthVisual() {
         transition={{ duration: 0.45 }}
         className="relative z-10 my-auto max-w-xl"
       >
-        <span className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Gestión de obra conectada</span>
-        <h1 className="mt-5 text-5xl font-black leading-[1.04] tracking-tight text-white xl:text-6xl">
+        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">Gestión de obra conectada</span>
+        <h1 className="mt-5 text-2xl font-semibold leading-[1.04] tracking-tight text-white xl:text-2xl">
           Del campo al control, sin perder información.
         </h1>
         <div className="mt-10 grid gap-3 sm:grid-cols-2">

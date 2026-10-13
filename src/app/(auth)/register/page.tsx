@@ -10,9 +10,8 @@ export default async function RegisterPage() {
 
   return (
     <section>
-      <span className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">Nueva empresa</span>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Crea tu cuenta</h1>
-      <p className="mt-3 mb-8 text-sm leading-6 text-slate-400">¿Tienes una invitación? Abre el enlace del correo.</p>
+      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Nueva empresa</span>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Crea tu cuenta</h1>
       <RegisterForm />
     </section>
   )

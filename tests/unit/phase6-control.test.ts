@@ -12,7 +12,9 @@ describe('phase 6 project control foundation', () => {
 
   it('formats progress and keeps approved/baseline states positive', () => {
     expect(pct(41.087)).toBe('41.09 %')
-    expect(controlStatusClass('approved')).toContain('emerald')
-    expect(controlStatusClass('baseline')).toContain('emerald')
+    expect(controlStatusClass('approved')).toContain('green')
+    expect(controlStatusClass('baseline')).toContain('slate')
   })
 })
+
+

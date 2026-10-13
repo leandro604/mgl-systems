@@ -1,6 +1,6 @@
 export default function WorkspaceLoading() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6" aria-label="Cargando módulo">
+    <div className="mx-auto max-w-7xl space-y-8" aria-label="Cargando módulo">
       <div className="space-y-3">
         <div className="h-3 w-28 animate-pulse rounded bg-slate-800" />
         <div className="h-8 w-72 max-w-full animate-pulse rounded-lg bg-slate-800" />

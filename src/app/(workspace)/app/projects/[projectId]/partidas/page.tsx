@@ -23,10 +23,10 @@ export default async function BudgetItemsPage({ params }: { params: Promise<{ pr
   const currency = data.baseline?.currency ?? data.company.currency
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2"><Table2 className="size-5 text-blue-600" /><h2 className="text-xl font-semibold text-slate-950">Módulo de partidas</h2></div>
+          <div className="flex items-center gap-2"><Table2 className="size-5 text-blue-600" /><h2 className="text-lg font-medium tracking-tight text-slate-950">Módulo de partidas</h2></div>
                   </div>
         <Button asChild variant="secondary" size="sm"><Link href={`/app/projects/${projectId}/control`}>Presupuestos y valorizaciones <ArrowRight /></Link></Button>
       </div>

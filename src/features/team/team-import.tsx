@@ -68,7 +68,7 @@ export function TeamExcelImport({ projects, canManage }: { projects: Project[]; 
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <select value={projectId} onChange={(event)=>setProjectId(event.target.value)} className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm" aria-label="Proyecto para importación">
+      <select value={projectId} onChange={(event)=>setProjectId(event.target.value)} className="h-9 rounded-lg border border-slate-300 bg-white px-4 text-sm" aria-label="Proyecto para importación">
         {projects.map((project)=><option key={project.id} value={project.id}>{project.code} · {project.name}</option>)}
       </select>
       <input ref={inputRef} type="file" accept=".xlsx" className="hidden" onChange={(event)=>void handleFile(event.target.files?.[0] ?? null)} />

@@ -13,11 +13,10 @@ export const valuationStatusLabel: Record<string, string> = {
 }
 
 export function controlStatusClass(status: string) {
-  if (status === 'baseline' || status === 'approved') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-  if (status === 'submitted') return 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200'
-  if (status === 'observed') return 'border-amber-500/30 bg-amber-500/10 text-amber-200'
-  if (status === 'superseded' || status === 'archived') return 'border-slate-700 bg-slate-800/70 text-slate-400'
-  return 'border-violet-500/30 bg-violet-500/10 text-violet-200'
+  if (status === 'approved') return 'border-green-200 bg-green-50 text-green-700'
+  if (status === 'submitted') return 'border-blue-200 bg-blue-50 text-blue-700'
+  if (status === 'observed') return 'border-amber-200 bg-amber-50 text-amber-700'
+  return 'border-slate-200 bg-slate-100 text-slate-600'
 }
 
 export function pct(value: number | null | undefined) {

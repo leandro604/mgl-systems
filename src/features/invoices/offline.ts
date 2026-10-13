@@ -5,7 +5,7 @@ import type { MglLocalDb } from '@/lib/db/dexie'
 import type { VerifiedIdentity } from '@/types/domain'
 
 export { generateInvoicePdf } from './pdf'
-export type { PrintableInvoice } from './pdf'
+export type { InvoicePdfFormat, PrintableInvoice } from './pdf'
 
 export function downloadPdf(bytes: Uint8Array, fileName: string) {
   const copy = Uint8Array.from(bytes)
@@ -51,6 +51,11 @@ export async function processIntegrationJobs(db: MglLocalDb, client: BrowserSupa
       if (data && typeof data === 'object' && 'ok' in data && data.ok === false) {
         const detail = 'error' in data ? String(data.error) : 'El proveedor rechazó el envío'
         throw new Error(detail)
+      }
+      const provider = data && typeof data === 'object' && 'provider' in data ? String(data.provider) : ''
+      const providerStatus = data && typeof data === 'object' && 'status' in data ? String(data.status).toLowerCase() : ''
+      if (provider === 'sunat_direct' || providerStatus === 'accepted' || providerStatus === 'aceptado') {
+        await fetch(`/api/invoices/${encodeURIComponent(job.entityId)}/sync-drive`, { method: 'POST' }).catch(() => undefined)
       }
       await db.integrationJobs.update(job.id, { status: 'done', lastError: null, updatedAt: Date.now() })
     } catch (error) {

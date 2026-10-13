@@ -17,7 +17,7 @@ export function Chip({ selected = false, removable = false, onRemove, className,
         type="button"
         aria-pressed={selected}
         className={cn(
-          'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors duration-150',
+          'inline-flex h-8 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30',
           selected
             ? 'border-blue-200 bg-blue-50 text-blue-700'

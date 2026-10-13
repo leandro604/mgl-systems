@@ -52,7 +52,7 @@ export function InvoiceLineForm({ projectId, invoiceId }: { projectId: string; i
   return <form action={action} className="space-y-4">
     <input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="invoice_id" value={invoiceId} />
     <Message state={state} />
-    <div className="grid gap-4 sm:grid-cols-[1.6fr_.45fr_.55fr_.7fr]">
+    <div className="grid gap-4 lg:grid-cols-[1.6fr_.45fr_.55fr_.7fr]">
       <div className="space-y-2"><Label htmlFor="description">Descripción</Label><Input id="description" name="description" placeholder="Descripción" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_code">Unidad</Label><Input id="unit_code" name="unit_code" defaultValue="NIU" required /></div>
       <div className="space-y-2"><Label htmlFor="quantity">Cantidad</Label><Input id="quantity" name="quantity" type="number" min="0.0001" step="0.0001" defaultValue="1" required /></div>
@@ -69,7 +69,7 @@ export function QueueInvoiceForm({ projectId, invoiceId, documentType, series }:
     <input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="invoice_id" value={invoiceId} />
     <Message state={state} />
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-      <div className="min-w-56 flex-1 space-y-2"><Label htmlFor="series">Serie fiscal</Label><select id="series" name="series" className={selectClass} defaultValue="" required><option value="" disabled>Seleccionar serie</option>{available.map((item) => <option key={item.series} value={item.series}>{item.series} · próximo {item.next_number}</option>)}</select></div>
+      <div className="min-w-0 flex-1 space-y-2"><Label htmlFor="series">Serie fiscal</Label><select id="series" name="series" className={selectClass} defaultValue="" required><option value="" disabled>Seleccionar serie</option>{available.map((item) => <option key={item.series} value={item.series}>{item.series} · próximo {item.next_number}</option>)}</select></div>
       <SubmitButton disabled={available.length === 0} pendingLabel="Numerando..."><Send />Numerar y poner en cola</SubmitButton>
     </div>
     {available.length === 0 ? <p className="text-xs text-amber-300">No existe una serie activa para este tipo de comprobante. Configúrala en Facturación.</p> : null}

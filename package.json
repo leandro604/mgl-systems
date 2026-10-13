@@ -1,9 +1,9 @@
 {
   "name": "mgl-systems",
-  "version": "0.18.0",
+  "version": "0.18.3",
   "private": true,
   "type": "module",
-  "description": "MGL Systems — v0.18.0: suscripciones SaaS recurrentes con Culqi",
+  "description": "MGL Systems — v0.18.3: visual refinement + responsive fiscal Drive archive",
   "engines": {
     "node": ">=22.0.0"
   },

@@ -25,9 +25,8 @@ export default async function OnboardingPage() {
       <div className="mx-auto max-w-2xl">
         <Logo />
         <div className="mt-12">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">Configuración inicial</span>
-          <h1 className="mt-3 text-4xl font-black tracking-tight text-white">{invitation ? 'Tienes una invitación pendiente' : 'Configura tu empresa'}</h1>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-slate-400">{invitation ? `Puedes unirte a ${invitation.company_name} sin crear un workspace separado.` : 'Crea un workspace solo si eres la persona que administrará una empresa nueva. Los demás usuarios deben entrar mediante una invitación.'}</p>
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Configuración inicial</span>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">{invitation ? 'Tienes una invitación pendiente' : 'Configura tu empresa'}</h1>
         </div>
         <Card className="mt-8 border-slate-800 bg-slate-900/70 p-6 sm:p-8">{invitation ? <InvitationAcceptance invitation={invitation} /> : <OnboardingForm />}</Card>
       </div>

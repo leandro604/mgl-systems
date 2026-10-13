@@ -108,6 +108,14 @@ export type Database = {
           bank_accounts: Json
           digital_wallets: Json
           configured_by: string | null
+          drive_enabled: boolean
+          drive_provider: string
+          drive_cloud_account_id: string | null
+          drive_root_folder_id: string
+          invoice_pdf_format: string
+          receipt_pdf_format: string
+          drive_last_sync_at: string | null
+          drive_last_sync_error: string | null
         }
         Insert: {
           company_id: string
@@ -141,6 +149,14 @@ export type Database = {
           bank_accounts?: Json
           digital_wallets?: Json
           configured_by?: string | null
+          drive_enabled?: boolean
+          drive_provider?: string
+          drive_cloud_account_id?: string | null
+          drive_root_folder_id?: string
+          invoice_pdf_format?: string
+          receipt_pdf_format?: string
+          drive_last_sync_at?: string | null
+          drive_last_sync_error?: string | null
         }
         Update: Partial<Database['public']['Tables']['company_fiscal_settings']['Insert']>
         Relationships: []
@@ -1620,6 +1636,56 @@ export type Database = {
           sunat_response_description?: string | null
         }
         Update: Partial<Database['public']['Tables']['invoices']['Insert']>
+        Relationships: []
+      }
+      invoice_cloud_assets: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          server_updated_at: string
+          mutation_id: string
+          deleted_at: string | null
+          company_id: string
+          project_id: string
+          invoice_id: string
+          provider: string
+          cloud_account_id: string
+          asset_type: string
+          pdf_format: string
+          file_id: string
+          file_name: string
+          web_url: string
+          parent_folder_id: string
+          mime_type: string
+          size_bytes: number
+          checksum_sha256: string | null
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          server_updated_at?: string
+          mutation_id?: string
+          deleted_at?: string | null
+          company_id: string
+          project_id: string
+          invoice_id: string
+          provider?: string
+          cloud_account_id: string
+          asset_type: string
+          pdf_format?: string
+          file_id: string
+          file_name: string
+          web_url?: string
+          parent_folder_id: string
+          mime_type: string
+          size_bytes?: number
+          checksum_sha256?: string | null
+          synced_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['invoice_cloud_assets']['Insert']>
         Relationships: []
       }
       invoice_items: {

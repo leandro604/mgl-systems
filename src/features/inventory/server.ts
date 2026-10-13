@@ -30,7 +30,7 @@ export const getProjectInventory = cache(async (projectId: string) => {
       supabase.from('materials').select('id,sku,name,category,unit_code,min_stock,notes').is('deleted_at', null).order('sku'),
       supabase.from('warehouses').select('id,code,name,location,responsible_id').eq('project_id', projectId).is('deleted_at', null).order('code'),
       supabase.from('inventory_stock').select('*').eq('project_id', projectId),
-      supabase.from('material_requests').select('id,number,needed_on,status,notes,requested_by,approved_by,approved_at,created_at').eq('project_id', projectId).is('deleted_at', null).order('created_at', { ascending: false }),
+      supabase.from('material_requests').select('id,number,title,needed_on,status,notes,requested_by,approved_by,approved_at,created_at').eq('project_id', projectId).is('deleted_at', null).order('created_at', { ascending: false }),
       supabase.from('material_request_fulfillment').select('*').eq('project_id', projectId),
       supabase.from('inventory_transactions').select('id,number,movement_type,status,source_warehouse_id,target_warehouse_id,material_request_id,purchase_order_id,occurred_at,notes,posted_at,created_by').eq('project_id', projectId).is('deleted_at', null).order('occurred_at', { ascending: false }).limit(40),
       supabase.from('project_inventory_summary').select('*').eq('project_id', projectId).maybeSingle(),

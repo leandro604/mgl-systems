@@ -11,7 +11,7 @@ export default async function Page() {
   const data = await getSubscriptionDashboard()
   if (!data.allowed) return <Card><CardHeader><CardTitle>Suscripción</CardTitle></CardHeader></Card>
 
-  return <div className="mx-auto max-w-6xl space-y-6">
+  return <div className="mx-auto max-w-6xl space-y-8">
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-3"><CreditCard className="size-6 text-blue-600" /><h1 className="text-2xl font-semibold tracking-tight">Suscripción</h1></div>
       <Button asChild variant="secondary"><Link href="/app/configuracion"><ArrowLeft className="size-4" />Volver</Link></Button>

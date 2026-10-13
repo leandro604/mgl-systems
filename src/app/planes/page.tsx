@@ -21,11 +21,11 @@ export default async function PlansPage() {
   return <main className="min-h-screen bg-[#FAFAFA] px-5 py-8 text-slate-950">
     <div className="mx-auto max-w-6xl">
       <div className="flex items-center justify-between gap-4"><Logo /><Button asChild variant="secondary"><Link href="/login">Ingresar</Link></Button></div>
-      <div className="mt-16 text-center"><h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Planes MGL Systems</h1></div>
-      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <div className="mt-16 text-center"><h1 className="text-2xl font-semibold tracking-tight sm:text-2xl">Planes MGL Systems</h1></div>
+      <div className="mt-10 grid gap-6 lg:grid-cols-3">
         {monthly.map((plan) => <div key={plan.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">{plan.name}</h2>
-          <p className="mt-4 text-3xl font-semibold">{money(plan.priceCents)}<span className="text-sm font-normal text-slate-500"> / mes</span></p>
+          <h2 className="text-sm font-medium text-slate-700">{plan.name}</h2>
+          <p className="mt-4 text-3xl font-semibold tabular-nums">{money(plan.priceCents)}<span className="text-sm font-normal text-slate-500"> / mes</span></p>
           <div className="mt-5 space-y-2 text-sm text-slate-600">
             <p className="flex items-center gap-2"><Check className="size-4 text-emerald-600" />{plan.maxProjects === null ? 'Proyectos ilimitados' : `${plan.maxProjects} proyectos`}</p>
             <p className="flex items-center gap-2"><Check className="size-4 text-emerald-600" />{plan.maxUsers ?? '∞'} usuarios</p>

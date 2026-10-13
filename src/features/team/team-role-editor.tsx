@@ -47,8 +47,8 @@ export function TeamRoleEditor({
   }
 
   return (
-    <div className="min-w-[270px]">
-      <form action={action} className="flex items-center gap-2">
+    <div className="w-full sm:w-auto sm:min-w-[270px]">
+      <form action={action} className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <input type="hidden" name="user_id" value={userId} />
         <select
           name="role"
@@ -56,13 +56,13 @@ export function TeamRoleEditor({
           onChange={(event) => setSelectedRole(event.target.value as AppRole)}
           disabled={pending}
           aria-label="Rol del usuario"
-          className="h-9 min-w-[160px] rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 disabled:bg-slate-50"
+          className="h-9 w-full min-w-0 rounded-lg sm:min-w-[160px] border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 disabled:bg-slate-50"
         >
           {(Object.keys(roleLabels) as AppRole[]).map((item) => (
             <option key={item} value={item}>{roleLabels[item]}</option>
           ))}
         </select>
-        <Button type="submit" size="sm" variant="secondary" disabled={pending || selectedRole === role}>
+        <Button type="submit" size="sm" variant="secondary" className="w-full sm:w-auto" disabled={pending || selectedRole === role}>
           {selectedRole === 'admin' ? <ShieldCheck /> : <UserCog />}
           {pending ? 'Guardando...' : 'Guardar'}
         </Button>

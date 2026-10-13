@@ -20,7 +20,7 @@ import {
 } from './actions'
 
 const selectClass = 'flex h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
-const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
+const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
 
 type MaterialOption = { id: string; sku: string; name: string; unit_code: string }
 type WarehouseOption = { id: string; code: string; name: string }

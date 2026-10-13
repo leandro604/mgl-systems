@@ -8,7 +8,7 @@ describe('phase 5 finance foundation', () => {
   })
 
   it('keeps accepted invoices visually distinct', () => {
-    expect(financialStatusClass('accepted')).toContain('emerald')
+    expect(financialStatusClass('accepted')).toContain('green')
     expect(invoiceStatusLabel.accepted).toBe('Aceptada')
   })
 
@@ -16,3 +16,4 @@ describe('phase 5 finance foundation', () => {
     expect(calculateTaxedLine(3, 0)).toEqual({ net: 0, tax: 0, total: 0 })
   })
 })
+

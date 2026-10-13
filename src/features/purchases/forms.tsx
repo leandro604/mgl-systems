@@ -9,7 +9,7 @@ import { initialFormState } from '@/features/auth/types'
 import { addPurchaseOrderLineAction, createPurchaseOrderAction, createSupplierAction, transitionPurchaseOrderAction } from './actions'
 
 const selectClass = 'flex h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
-const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
+const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
 
 function Message({ state }: { state: typeof initialFormState }) {
   if (!state.message) return null
@@ -58,9 +58,9 @@ export function PurchaseOrderLineForm({ projectId, orderId, budgetItems = [], ma
   return <form action={action} className="space-y-4">
     <input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="order_id" value={orderId} />
     <Message state={state} />
-    <div className="space-y-2"><Label htmlFor="budget_item_id">Centro de costo / partida presupuestal</Label><select id="budget_item_id" name="budget_item_id" className={selectClass} defaultValue=""><option value="">Sin asignar</option>{usable.map((item) => <option key={item.budget_item_id} value={item.budget_item_id}>{item.code} · {item.description}</option>)}</select><p className="text-xs text-slate-500">Asignar la partida permite que la orden alimente automáticamente el control presupuestal de Fase 6.</p></div>
-    <div className="space-y-2"><Label htmlFor="material_id">Material de almacén</Label><select id="material_id" name="material_id" className={selectClass} defaultValue=""><option value="">No controla stock</option>{materials.map((material) => <option key={material.id} value={material.id}>{material.sku} · {material.name} ({material.unit_code})</option>)}</select><p className="text-xs text-slate-500">Vincúlalo si la partida será recibida físicamente en un almacén durante Fase 7.</p></div>
-    <div className="grid gap-4 sm:grid-cols-[1.6fr_.45fr_.55fr_.7fr]">
+    <div className="space-y-2"><Label htmlFor="budget_item_id">Centro de costo / partida presupuestal</Label><select id="budget_item_id" name="budget_item_id" className={selectClass} defaultValue=""><option value="">Sin asignar</option>{usable.map((item) => <option key={item.budget_item_id} value={item.budget_item_id}>{item.code} · {item.description}</option>)}</select></div>
+    <div className="space-y-2"><Label htmlFor="material_id">Material de almacén</Label><select id="material_id" name="material_id" className={selectClass} defaultValue=""><option value="">No controla stock</option>{materials.map((material) => <option key={material.id} value={material.id}>{material.sku} · {material.name} ({material.unit_code})</option>)}</select></div>
+    <div className="grid gap-4 lg:grid-cols-[1.6fr_.45fr_.55fr_.7fr]">
       <div className="space-y-2"><Label htmlFor="description">Descripción</Label><Input id="description" name="description" placeholder="Descripción" required /></div>
       <div className="space-y-2"><Label htmlFor="unit_code">Unidad</Label><Input id="unit_code" name="unit_code" defaultValue="NIU" required /></div>
       <div className="space-y-2"><Label htmlFor="quantity">Cantidad</Label><Input id="quantity" name="quantity" type="number" min="0.0001" step="0.0001" defaultValue="1" required /></div>

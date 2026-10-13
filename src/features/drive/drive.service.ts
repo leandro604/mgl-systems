@@ -14,7 +14,7 @@ type TokenResponse = {
 
 type CloudAccountRow = Database['public']['Tables']['cloud_accounts']['Row']
 
-type DriveAccess = {
+export type DriveAccess = {
   cloudAccountId?: string
   admin?: boolean
 }
@@ -325,6 +325,92 @@ export async function createUploadSession(provider: DriveProvider, input: { pare
 
 export async function uploadFile(provider: DriveProvider, input: { parentId: string; fileName: string; mimeType: string; sizeBytes: number }, access?: DriveAccess) {
   return createUploadSession(provider, input, access)
+}
+
+
+export async function ensureDriveFolder(provider: DriveProvider, name: string, parentId = 'root', access?: DriveAccess): Promise<DriveItem> {
+  const existing = (await listDriveItems(provider, parentId, access)).find((item) => item.isFolder && item.name === name)
+  if (existing) return existing
+  return createFolder(provider, name, parentId, access)
+}
+
+export async function uploadDriveBytes(
+  provider: DriveProvider,
+  input: { parentId: string; fileName: string; mimeType: string; bytes: Uint8Array },
+  access?: DriveAccess,
+): Promise<DriveItem> {
+  const bytes = Uint8Array.from(input.bytes)
+  const existing = (await listDriveItems(provider, input.parentId, access)).find((item) => !item.isFolder && item.name === input.fileName)
+  const token = await accessToken(provider, access)
+
+  if (provider === 'google') {
+    if (existing) {
+      const response = await fetchWithRetry(
+        `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(existing.id)}?uploadType=media&fields=id,name,mimeType,size,webViewLink,parents`,
+        {
+          method: 'PATCH',
+          headers: { authorization: `Bearer ${token}`, 'content-type': input.mimeType },
+          body: bytes.buffer,
+        },
+      )
+      const data = await response.json() as { id?: string; name?: string; mimeType?: string; size?: string; webViewLink?: string; parents?: string[]; error?: { message?: string } }
+      if (!response.ok || !data.id) throw new Error(data.error?.message ?? `Google Drive upload failed (${response.status})`)
+      return googleItem(data as { id: string; name?: string; mimeType?: string; size?: string; webViewLink?: string; parents?: string[] })
+    }
+
+    const sessionResponse = await fetchWithRetry('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,webViewLink,parents', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json; charset=UTF-8',
+        'x-upload-content-type': input.mimeType,
+        'x-upload-content-length': String(bytes.byteLength),
+      },
+      body: JSON.stringify({ name: input.fileName, parents: [input.parentId] }),
+    })
+    if (!sessionResponse.ok) throw new Error(`Google upload session failed (${sessionResponse.status})`)
+    const uploadUrl = sessionResponse.headers.get('location')
+    if (!uploadUrl) throw new Error('Google upload session URL missing')
+    const response = await fetchWithRetry(uploadUrl, {
+      method: 'PUT',
+      headers: { 'content-type': input.mimeType, 'content-length': String(bytes.byteLength) },
+      body: bytes.buffer,
+    })
+    const data = await response.json() as { id?: string; name?: string; mimeType?: string; size?: string; webViewLink?: string; parents?: string[]; error?: { message?: string } }
+    if (!response.ok || !data.id) throw new Error(data.error?.message ?? `Google Drive upload failed (${response.status})`)
+    return googleItem(data as { id: string; name?: string; mimeType?: string; size?: string; webViewLink?: string; parents?: string[] })
+  }
+
+  const pathName = encodeURIComponent(input.fileName).replace(/%2F/gi, '/')
+  const location = input.parentId === 'root' ? 'root' : `items/${encodeURIComponent(input.parentId)}`
+  const response = await fetchWithRetry(`https://graph.microsoft.com/v1.0/me/drive/${location}:/${pathName}:/content`, {
+    method: 'PUT',
+    headers: { authorization: `Bearer ${token}`, 'content-type': input.mimeType },
+    body: bytes.buffer,
+  })
+  const data = await response.json() as { id?: string; name?: string; folder?: unknown; file?: { mimeType?: string }; size?: number; webUrl?: string; parentReference?: { id?: string }; error?: { message?: string } }
+  if (!response.ok || !data.id) throw new Error(data.error?.message ?? `OneDrive upload failed (${response.status})`)
+  return microsoftItem(data as { id: string; name?: string; folder?: unknown; file?: { mimeType?: string }; size?: number; webUrl?: string; parentReference?: { id?: string } })
+}
+
+export async function downloadDriveFile(
+  provider: DriveProvider,
+  fileId: string,
+  access?: DriveAccess,
+): Promise<{ bytes: Uint8Array; contentType: string }> {
+  const token = await accessToken(provider, access)
+  const url = provider === 'google'
+    ? `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`
+    : `https://graph.microsoft.com/v1.0/me/drive/items/${encodeURIComponent(fileId)}/content`
+  const response = await fetchWithRetry(url, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' })
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '')
+    throw new Error(detail || `${provider} download failed (${response.status})`)
+  }
+  return {
+    bytes: new Uint8Array(await response.arrayBuffer()),
+    contentType: response.headers.get('content-type') ?? 'application/octet-stream',
+  }
 }
 
 export async function watchFolder(provider: DriveProvider, folderId: string, notificationUrl: string, input: { cloudAccountId: string; channelToken: string }): Promise<WatchRegistration> {

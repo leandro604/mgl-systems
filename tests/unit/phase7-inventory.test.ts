@@ -17,9 +17,11 @@ describe('Phase 7 inventory helpers', () => {
   })
 
   it('maps inventory workflow states to semantic visual classes', () => {
-    expect(inventoryStatusClass('posted')).toContain('emerald')
-    expect(inventoryStatusClass('submitted')).toContain('cyan')
-    expect(inventoryStatusClass('cancelled')).toContain('red')
+    expect(inventoryStatusClass('posted')).toContain('green')
+    expect(inventoryStatusClass('submitted')).toContain('blue')
+    expect(inventoryStatusClass('cancelled')).toContain('slate')
     expect(inventoryStatusClass('unknown')).toContain('slate')
   })
 })
+
+

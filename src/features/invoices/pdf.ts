@@ -63,7 +63,16 @@ export type PrintableInvoice = {
   sunatDigest?: string | null
 }
 
+export type InvoicePdfFormat = 'a4' | 'a5' | 'ticket80' | 'ticket58'
+
 const A4: [number, number] = [595.28, 841.89]
+const A5: [number, number] = [419.53, 595.28]
+const TICKET_80_WIDTH = 226.77
+const TICKET_58_WIDTH = 164.41
+
+export function normalizeInvoicePdfFormat(value: string | null | undefined, fallback: InvoicePdfFormat = 'a4'): InvoicePdfFormat {
+  return value === 'a4' || value === 'a5' || value === 'ticket80' || value === 'ticket58' ? value : fallback
+}
 const MARGIN = 42
 const TEXT = rgb(0.12, 0.16, 0.23)
 const MUTED = rgb(0.38, 0.43, 0.5)
@@ -513,7 +522,7 @@ function drawFooter(ctx: PageContext, invoice: PrintableInvoice, pageNumber: num
   page.drawText(pageLabel, { x: width - MARGIN - regular.widthOfTextAtSize(pageLabel, 7), y: 49, size: 7, font: regular, color: MUTED })
 }
 
-export async function generateInvoicePdf(invoice: PrintableInvoice, pending = false): Promise<Uint8Array> {
+async function generateA4InvoicePdf(invoice: PrintableInvoice, pending = false): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
   pdf.setTitle(`${docName(invoice.documentType)} ${invoice.series ?? ''}-${invoice.number ?? ''}`.trim())
   pdf.setAuthor(clean(invoice.issuerName) || 'MGL Systems')
@@ -585,4 +594,210 @@ export async function generateInvoicePdf(invoice: PrintableInvoice, pending = fa
   })
 
   return pdf.save()
+}
+
+
+async function scaleA4ToA5(bytes: Uint8Array): Promise<Uint8Array> {
+  const source = await PDFDocument.load(bytes)
+  const target = await PDFDocument.create()
+  target.setTitle(source.getTitle() ?? 'Comprobante electrónico')
+  target.setAuthor(source.getAuthor() ?? 'MGL Systems')
+  target.setCreator('MGL Systems')
+  target.setProducer('MGL Systems · pdf-lib')
+  for (const sourcePage of source.getPages()) {
+    const embedded = await target.embedPage(sourcePage)
+    const page = target.addPage(A5)
+    const scale = Math.min(A5[0] / sourcePage.getWidth(), A5[1] / sourcePage.getHeight())
+    const width = sourcePage.getWidth() * scale
+    const height = sourcePage.getHeight() * scale
+    page.drawPage(embedded, {
+      x: (A5[0] - width) / 2,
+      y: (A5[1] - height) / 2,
+      width,
+      height,
+    })
+  }
+  return target.save()
+}
+
+function ticketLineHeight(size: number) {
+  return size + 3
+}
+
+function ticketWrap(text: string, font: PDFFont, size: number, width: number) {
+  return wrapText(clean(text), font, size, width)
+}
+
+async function generateTicketInvoicePdf(invoice: PrintableInvoice, pending: boolean, width: number): Promise<Uint8Array> {
+  const pdf = await PDFDocument.create()
+  pdf.setTitle(`${docName(invoice.documentType)} ${invoice.series ?? ''}-${invoice.number ?? ''}`.trim())
+  pdf.setAuthor(clean(invoice.issuerName) || 'MGL Systems')
+  pdf.setCreator('MGL Systems')
+  pdf.setProducer('MGL Systems · pdf-lib')
+  const regular = await pdf.embedFont(StandardFonts.Helvetica)
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
+
+  const margin = width <= TICKET_58_WIDTH + 1 ? 10 : 13
+  const contentWidth = width - margin * 2
+  const bodySize = width <= TICKET_58_WIDTH + 1 ? 6.4 : 7.1
+  const smallSize = width <= TICKET_58_WIDTH + 1 ? 5.6 : 6.2
+  const itemSize = width <= TICKET_58_WIDTH + 1 ? 6.0 : 6.6
+  const line = ticketLineHeight(bodySize)
+  const itemLines = invoice.items.reduce((count, item) => count + Math.max(1, ticketWrap(item.description, regular, itemSize, contentWidth).length) + 2, 0)
+  const paymentLines = Math.min(invoice.bankAccounts?.length ?? 0, 2) * 3 + Math.min(invoice.digitalWallets?.length ?? 0, 2) * 2
+  const height = Math.max(430, 330 + itemLines * (itemSize + 2.5) + paymentLines * 8)
+  const page = pdf.addPage([width, height])
+  let y = height - 18
+
+  const center = (text: string, size: number, font: PDFFont, gap = 2) => {
+    const value = clean(text)
+    const x = Math.max(margin, (width - font.widthOfTextAtSize(value, size)) / 2)
+    page.drawText(value, { x, y, size, font, color: DARK })
+    y -= size + gap
+  }
+  const divider = () => {
+    y -= 3
+    page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.55, color: BORDER })
+    y -= 7
+  }
+  const wrapped = (text: string, size = bodySize, font = regular, maxLines = 99) => {
+    const rows = ticketWrap(text, font, size, contentWidth).slice(0, maxLines)
+    for (const row of rows) {
+      page.drawText(row, { x: margin, y, size, font, color: TEXT })
+      y -= ticketLineHeight(size)
+    }
+  }
+  const pair = (label: string, value: string) => {
+    page.drawText(clean(label), { x: margin, y, size: smallSize, font: bold, color: MUTED })
+    y -= ticketLineHeight(smallSize)
+    wrapped(value || '-', bodySize, regular, 3)
+  }
+
+  center(invoice.issuerName, width <= TICKET_58_WIDTH + 1 ? 8 : 9, bold, 3)
+  center(`RUC ${invoice.issuerRuc}`, bodySize, bold, 3)
+  if (invoice.issuerAddress) wrapped(invoice.issuerAddress, smallSize, regular, 3)
+  if (invoice.issuerPhones?.length) center(invoice.issuerPhones.slice(0, 2).join(' · '), smallSize, regular, 2)
+  divider()
+  center(docName(invoice.documentType), width <= TICKET_58_WIDTH + 1 ? 7 : 8, bold, 3)
+  const identifier = invoice.series && invoice.number !== null ? `${invoice.series}-${String(invoice.number).padStart(8, '0')}` : 'BORRADOR'
+  center(identifier, width <= TICKET_58_WIDTH + 1 ? 9 : 10, bold, 5)
+  divider()
+
+  pair('CLIENTE', invoice.customerName)
+  pair(customerDocumentLabel(invoice.customerDocumentType), invoice.customerDocumentNumber)
+  if (invoice.customerAddress) pair('DIRECCIÓN', invoice.customerAddress)
+  pair('FECHA', invoice.issuedOn)
+  pair('MONEDA', invoice.currency === 'USD' ? 'Dólares (USD)' : 'Soles (PEN)')
+  divider()
+
+  page.drawText('DETALLE', { x: margin, y, size: bodySize, font: bold, color: DARK })
+  y -= line
+  for (const item of invoice.items) {
+    const amount = Number(item.netAmount ?? item.quantity * item.unitPrice)
+    wrapped(`${item.lineNumber}. ${item.description}`, itemSize, regular, 6)
+    const qty = `${Number(item.quantity).toFixed(2)} ${clean(item.unitCode || 'NIU')} x ${money(item.unitPrice, invoice.currency)}`
+    page.drawText(qty, { x: margin, y, size: smallSize, font: regular, color: MUTED })
+    const total = money(amount, invoice.currency)
+    page.drawText(total, { x: width - margin - regular.widthOfTextAtSize(total, smallSize), y, size: smallSize, font: regular, color: TEXT })
+    y -= ticketLineHeight(smallSize) + 4
+  }
+  divider()
+
+  const totalRow = (label: string, value: string, strong = false) => {
+    const font = strong ? bold : regular
+    const size = strong ? bodySize + 1 : bodySize
+    page.drawText(label, { x: margin, y, size, font, color: strong ? DARK : MUTED })
+    page.drawText(value, { x: width - margin - font.widthOfTextAtSize(value, size), y, size, font, color: DARK })
+    y -= ticketLineHeight(size)
+  }
+  totalRow('OP. GRAVADAS', money(invoice.netAmount, invoice.currency))
+  totalRow('IGV (18%)', money(invoice.taxAmount, invoice.currency))
+  totalRow('TOTAL', money(invoice.totalAmount, invoice.currency), true)
+  y -= 3
+  wrapped(`SON: ${amountInWords(invoice.totalAmount, invoice.currency)}`, smallSize, bold, 5)
+  divider()
+
+  const accepted = invoice.status === 'accepted' || invoice.cdrCode === '0'
+  if (accepted) center('ACEPTADO POR SUNAT', bodySize, bold, 3)
+  else if (pending || ['draft', 'queued', 'processing', 'submitted', 'unknown'].includes(invoice.status)) center(invoice.status === 'draft' ? 'BORRADOR' : 'PENDIENTE DE SUNAT', bodySize, bold, 3)
+
+  if (invoice.pdfThankYouMessage) wrapped(invoice.pdfThankYouMessage, smallSize, bold, 4)
+  if (invoice.pdfAdditionalMessage) wrapped(invoice.pdfAdditionalMessage, smallSize, regular, 5)
+  if (invoice.bankAccounts?.length || invoice.digitalWallets?.length) {
+    divider()
+    page.drawText('PAGO', { x: margin, y, size: smallSize, font: bold, color: MUTED })
+    y -= ticketLineHeight(smallSize)
+    for (const account of (invoice.bankAccounts ?? []).slice(0, 2)) {
+      wrapped(`${account.bank} ${account.currency} · ${account.accountNumber}`, smallSize, regular, 3)
+      if (account.cci) wrapped(`CCI ${account.cci}`, smallSize, regular, 2)
+    }
+    for (const wallet of (invoice.digitalWallets ?? []).slice(0, 2)) wrapped(`${wallet.provider}: ${wallet.phone}`, smallSize, regular, 2)
+  }
+
+  const payload = sunatQrPayload(invoice)
+  if (payload) {
+    y -= 6
+    const qr = new QRCode(-1, 3)
+    qr.addData(payload)
+    qr.make()
+    const count = qr.getModuleCount()
+    const quiet = 4
+    const maxQr = Math.min(width * 0.5, 92)
+    const moduleSize = Math.max(0.5, maxQr / (count + quiet * 2))
+    const qrSize = moduleSize * (count + quiet * 2)
+    const qrX = (width - qrSize) / 2
+    const qrY = Math.max(32, y - qrSize)
+    page.drawRectangle({ x: qrX, y: qrY, width: qrSize, height: qrSize, color: rgb(1, 1, 1) })
+    for (let row = 0; row < count; row += 1) {
+      for (let col = 0; col < count; col += 1) {
+        if (!qr.isDark(row, col)) continue
+        page.drawRectangle({
+          x: qrX + (col + quiet) * moduleSize,
+          y: qrY + (count - 1 - row + quiet) * moduleSize,
+          width: moduleSize + 0.02,
+          height: moduleSize + 0.02,
+          color: rgb(0, 0, 0),
+        })
+      }
+    }
+    y = qrY - 10
+  }
+
+  const footer = invoice.status === 'draft'
+    ? 'Documento de trabajo. No constituye comprobante emitido.'
+    : 'Representación impresa generada por MGL Systems.'
+  const footerLines = ticketWrap(footer, regular, smallSize, contentWidth).slice(0, 3)
+  footerLines.forEach((row) => {
+    page.drawText(row, { x: margin, y: Math.max(12, y), size: smallSize, font: regular, color: MUTED })
+    y -= ticketLineHeight(smallSize)
+  })
+
+  if (pending || invoice.status === 'draft') {
+    const text = invoice.status === 'draft' ? 'BORRADOR' : 'PENDIENTE'
+    const size = width <= TICKET_58_WIDTH + 1 ? 20 : 25
+    page.drawText(text, {
+      x: Math.max(8, (width - bold.widthOfTextAtSize(text, size)) / 2),
+      y: height / 2,
+      size,
+      font: bold,
+      color: rgb(0.72, 0.12, 0.12),
+      opacity: 0.09,
+      rotate: degrees(30),
+    })
+  }
+
+  return pdf.save()
+}
+
+export async function generateInvoicePdf(
+  invoice: PrintableInvoice,
+  pending = false,
+  format: InvoicePdfFormat = 'a4',
+): Promise<Uint8Array> {
+  const normalized = normalizeInvoicePdfFormat(format)
+  if (normalized === 'ticket80') return generateTicketInvoicePdf(invoice, pending, TICKET_80_WIDTH)
+  if (normalized === 'ticket58') return generateTicketInvoicePdf(invoice, pending, TICKET_58_WIDTH)
+  const a4 = await generateA4InvoicePdf(invoice, pending)
+  if (normalized === 'a5') return scaleA4ToA5(a4)
+  return a4
 }

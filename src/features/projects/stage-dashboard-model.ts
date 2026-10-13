@@ -54,6 +54,7 @@ export type StageDashboardStage = {
   criticalItems: number
   costStatus: CostStatus
   hasCostData: boolean
+  tasks: Array<{ id: string; title: string; status: string; progress: number }>
 }
 
 export type RecentActivity = {

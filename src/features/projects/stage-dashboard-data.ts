@@ -75,7 +75,7 @@ export async function getStageDashboardData(projectId: string): Promise<StageDas
       .order('sort_order'),
     supabase
       .from('tasks')
-      .select('stage_id,progress,planned_weight,task_type')
+      .select('id,title,status,stage_id,progress,planned_weight,task_type')
       .eq('project_id', projectId)
       .is('deleted_at', null),
     supabase
@@ -143,6 +143,7 @@ export async function getStageDashboardData(projectId: string): Promise<StageDas
       criticalItems: cost?.critical_items ?? 0,
       costStatus: resolveCostStatus(quotedTotal, actualTotal, thresholds),
       hasCostData: quotedTotal !== 0 || actualTotal !== 0,
+      tasks: tasks.filter((task) => task.stage_id === stage.id && task.task_type !== 'summary').map((task) => ({ id: task.id, title: task.title, status: task.status, progress: Number(task.progress) })),
     }
   })
 

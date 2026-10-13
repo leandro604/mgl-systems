@@ -48,7 +48,7 @@ export function RegisterForm() {
         <div className="space-y-2"><Label htmlFor="password">Contraseña</Label><Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required /></div>
         <div className="space-y-2"><Label htmlFor="passwordConfirmation">Confirmar contraseña</Label><Input id="passwordConfirmation" name="passwordConfirmation" type="password" autoComplete="new-password" minLength={8} required /></div>
       </div>
-      <p className="text-xs leading-5 text-slate-500">Usa al menos 8 caracteres. La empresa y tu rol administrativo se configuran después de verificar la cuenta.</p>
+      
       <SubmitButton className="w-full" size="lg" pendingLabel="Creando cuenta..."><UserPlus />Crear cuenta</SubmitButton>
       <p className="text-center text-sm text-slate-500">¿Ya tienes una cuenta? <Link href="/login" className="font-semibold text-cyan-300 hover:text-cyan-200">Iniciar sesión</Link></p>
     </form>

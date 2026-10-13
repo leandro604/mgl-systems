@@ -194,7 +194,7 @@ export function GlobalSearchCommand({ companyId, userId, projects }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden h-9 min-w-48 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 text-left text-xs text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-700 sm:flex lg:min-w-56"
+        className="hidden h-9 min-w-0 max-w-sm flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 text-left text-xs text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-700 md:flex"
         aria-label="Abrir búsqueda global"
         aria-keyshortcuts="Control+K Meta+K"
       >
@@ -207,7 +207,7 @@ export function GlobalSearchCommand({ companyId, userId, projects }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 sm:hidden"
+        className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 md:hidden"
         aria-label="Abrir búsqueda global"
         aria-keyshortcuts="Control+K Meta+K"
       >
@@ -314,7 +314,7 @@ export function GlobalSearchCommand({ companyId, userId, projects }: Props) {
                 <span>↵ abrir</span>
                 <span>Esc cerrar</span>
               </span>
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-2">
                 {!online ? <WifiOff className="size-3.5 text-amber-500" /> : null}
                 {localReady ? 'Índice local listo' : 'Cargando índice local…'}
               </span>

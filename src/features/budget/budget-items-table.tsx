@@ -97,7 +97,7 @@ function InlineNumber({ value, disabled, onCommit, ariaLabel }: { value: number;
         if (event.key === 'Enter') { event.currentTarget.blur() }
         if (event.key === 'Escape') { setDraft(String(value)); event.currentTarget.blur() }
       }}
-      className="h-9 w-28 rounded-md border border-slate-300 bg-white px-2 text-right text-sm tabular-nums text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:bg-slate-100"
+      className="mt-1 h-9 w-full min-w-0 rounded-md md:mt-0 md:w-28 border border-slate-300 bg-white px-2 text-right text-sm tabular-nums text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:bg-slate-100"
     />
   )
 }
@@ -178,7 +178,7 @@ export function BudgetItemsTable({ projectId, baselineId, currency, role, thresh
       <CardContent className="space-y-4">
         <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_auto] xl:items-center">
           <SearchInput value={query} onChange={(event) => setQuery(event.target.value)} onClear={() => setQuery('')} placeholder="Buscar partidas" />
-          <select value={stageId} onChange={(event) => setStageId(event.target.value)} className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900">
+          <select value={stageId} onChange={(event) => setStageId(event.target.value)} className="h-10 rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-900">
             <option value="all">Todas las etapas</option>
             {stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.code} · {stage.name}</option>)}
           </select>
@@ -191,7 +191,45 @@ export function BudgetItemsTable({ projectId, baselineId, currency, role, thresh
 
         {message ? <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"><AlertCircle className="size-4" />{message}</div> : null}
 
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <div className="space-y-3 md:hidden">
+          {filtered.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">Sin resultados</div>
+          ) : filtered.map((item) => {
+            const isGroup = item.item_type === 'group'
+            const stage = stageById.get(item.stage_id)
+            return (
+              <article key={item.id} className={`rounded-xl border border-slate-200 p-4 ${isGroup ? 'bg-slate-100' : rowTone[item.cost_status]}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs font-semibold text-blue-700">{item.code}</p>
+                    <Link href={`/app/projects/${projectId}/partidas/${item.id}`} className="mt-1 block break-words text-sm font-semibold leading-5 text-slate-900 hover:text-blue-700">{item.description}</Link>
+                    <p className="mt-1 text-xs text-slate-500">{stage ? `${stage.code} · ${stage.name}` : 'Sin etapa'}{isGroup ? '' : ` · ${item.unit_code}`}</p>
+                  </div>
+                  {isGroup ? <Badge variant="neutral" className="shrink-0">Grupo</Badge> : <Badge variant={statusVariant[item.cost_status]} className="shrink-0">{statusLabel[item.cost_status]}</Badge>}
+                </div>
+                {!isGroup ? (
+                  <>
+                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
+                      <div><dt className="text-slate-500">Cotizado</dt><dd className="mt-1 font-semibold tabular-nums text-slate-900">{formatMoney(Number(item.budget_amount ?? 0), currency)}</dd></div>
+                      <div><dt className="text-slate-500">Real</dt><dd className="mt-1 font-semibold tabular-nums text-slate-900">{formatMoney(Number(item.actual_amount ?? 0), currency)}</dd></div>
+                      <div><dt className="text-slate-500">Comprometido</dt><dd className="mt-1 tabular-nums text-slate-800">{formatMoney(Number(item.committed_amount ?? 0), currency)}</dd></div>
+                      <div><dt className="text-slate-500">Disponible</dt><dd className={Number(item.available_amount ?? 0) < 0 ? 'mt-1 font-semibold tabular-nums text-red-700' : 'mt-1 tabular-nums text-slate-800'}>{formatMoney(Number(item.available_amount ?? 0), currency)}</dd></div>
+                      <div><dt className="text-slate-500">Metrado cot.</dt><dd className="mt-1 tabular-nums text-slate-800">{Number(item.quantity).toLocaleString('es-PE')}</dd></div>
+                      <div><dt className="text-slate-500">Δ real</dt><dd className={Number(item.deviation_pct ?? 0) > 0 ? 'mt-1 font-semibold tabular-nums text-red-700' : 'mt-1 font-semibold tabular-nums text-green-700'}>{item.deviation_pct === null ? '—' : `${Number(item.deviation_pct).toFixed(2)}%`}</dd></div>
+                    </dl>
+                    <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-200 pt-4">
+                      <label className="text-xs font-medium text-slate-500">Metrado real<InlineNumber value={Number(item.qty_actual ?? 0)} disabled={false} ariaLabel={`Metrado real ${item.code}`} onCommit={(value) => edit(item, { qty_actual: value })} /></label>
+                      <label className="text-xs font-medium text-slate-500">P.U. real<InlineNumber value={Number(item.unit_price_actual ?? 0)} disabled={!canEditPrice} ariaLabel={`Precio real ${item.code}`} onCommit={(value) => edit(item, { unit_price_actual: value })} /></label>
+                    </div>
+                  </>
+                ) : null}
+                {(item.pending_sync || item.sync_error) ? <div className="mt-3 flex items-center gap-2 text-xs">{item.pending_sync ? <><CloudUpload className="size-3.5 text-amber-600" /><span className="text-amber-700">Pendiente de sincronizar</span></> : null}{item.sync_error ? <><AlertCircle className="size-3.5 text-red-600" /><span className="text-red-700">Error de sincronización</span></> : null}</div> : null}
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="mgl-table-scroll hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
           <table className="min-w-[1620px] text-sm">
             <thead>
               <tr>

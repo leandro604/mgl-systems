@@ -1,6 +1,6 @@
 {
   "engine": "PGlite PostgreSQL; Supabase Auth stub",
-  "tested_at": "2026-09-26T23:44:42.891Z",
+  "tested_at": "2026-10-13T23:44:02.803Z",
   "tests": [
     {
       "name": "Schema executes transactionally",
@@ -51,6 +51,18 @@
       "status": "PASS"
     },
     {
+      "name": "Task 16 Culqi subscription SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Task 16 billing indexes SQL executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Task 16 billing event policy SQL executes",
+      "status": "PASS"
+    },
+    {
       "name": "Authenticated user can bootstrap company as initial admin",
       "status": "PASS"
     },
@@ -68,6 +80,18 @@
     },
     {
       "name": "Admin sees only assigned project, not unassigned or foreign",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin sees public subscription plans",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can read company subscription billing",
+      "status": "PASS"
+    },
+    {
+      "name": "Supervisor cannot read subscription billing",
       "status": "PASS"
     },
     {
@@ -228,8 +252,195 @@
     },
     {
       "name": "Valuation snapshots baseline unit price",
-      "status": "FAIL",
-      "error": "permission denied for table valuation_items"
+      "status": "PASS"
+    },
+    {
+      "name": "Valuation state machine submits and approves",
+      "status": "PASS"
+    },
+    {
+      "name": "Approved valuation lines are immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "Project control summary combines budget progress costs and valuations",
+      "status": "PASS"
+    },
+    {
+      "name": "Supervisor cannot read project control financial data",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can create material catalog and project warehouses",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker can create and submit own material request",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot approve material request",
+      "status": "PASS"
+    },
+    {
+      "name": "Worker cannot create inventory movement",
+      "status": "PASS"
+    },
+    {
+      "name": "Supervisor can approve material request",
+      "status": "PASS"
+    },
+    {
+      "name": "Supervisor cannot edit company material catalog",
+      "status": "PASS"
+    },
+    {
+      "name": "Posted adjustment-in creates stock and value",
+      "status": "PASS"
+    },
+    {
+      "name": "Atomic inventory RPC posts movement without leaving a draft",
+      "status": "PASS"
+    },
+    {
+      "name": "Inventory posting rejects insufficient stock",
+      "status": "PASS"
+    },
+    {
+      "name": "Request issue uses average cost and fulfills request",
+      "status": "PASS"
+    },
+    {
+      "name": "Warehouse transfer preserves project stock value",
+      "status": "PASS"
+    },
+    {
+      "name": "Stock-controlled purchase line requires company base currency",
+      "status": "PASS"
+    },
+    {
+      "name": "Purchase receipt snapshots PO net cost into stock",
+      "status": "PASS"
+    },
+    {
+      "name": "Posted inventory transaction and lines are immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "Project inventory summary consolidates stock and open requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can structure WBS and typed CPM dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "WBS hierarchy rejects a non-summary parent",
+      "status": "PASS"
+    },
+    {
+      "name": "A summary with active children cannot be demoted",
+      "status": "PASS"
+    },
+    {
+      "name": "CPM dependencies reject summary nodes",
+      "status": "PASS"
+    },
+    {
+      "name": "Milestone requires identical start and finish dates",
+      "status": "PASS"
+    },
+    {
+      "name": "Task progress changes are recorded for S-curve history",
+      "status": "PASS"
+    },
+    {
+      "name": "Schedule baseline snapshots tasks/dependencies and versions immutably",
+      "status": "PASS"
+    },
+    {
+      "name": "Planning context RPC consolidates schedule in one read",
+      "status": "PASS"
+    },
+    {
+      "name": "Queued invoice no longer editable from client",
+      "status": "PASS"
+    },
+    {
+      "name": "Queued invoice lines locked even for administrators",
+      "status": "PASS"
+    },
+    {
+      "name": "Issued invoice cannot be reopened as draft by server",
+      "status": "PASS"
+    },
+    {
+      "name": "Idempotency uniqueness per actor/company",
+      "status": "PASS"
+    },
+    {
+      "name": "Soft-deleted task remains readable as synchronization tombstone",
+      "status": "PASS"
+    },
+    {
+      "name": "Revoked member loses project access",
+      "status": "PASS"
+    },
+    {
+      "name": "Foreign company sees no Alpha tasks or invoices",
+      "status": "PASS"
+    },
+    {
+      "name": "All 34 tables have RLS and soft delete",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot read projects",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot execute project RPC",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot execute company bootstrap RPC",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot queue invoices",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot transition purchase orders",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot activate budgets",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot transition valuations",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot transition material requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot post inventory transactions",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot create atomic inventory movements",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot create schedule baselines",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous cannot execute planning context RPC",
+      "status": "PASS"
     }
   ]
 }

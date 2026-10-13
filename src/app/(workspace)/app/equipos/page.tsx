@@ -32,7 +32,7 @@ export default async function TeamDirectoryPage({ searchParams }: { searchParams
   const isAdmin = ctx.profile.role === 'admin'
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Equipo</h1>
@@ -51,7 +51,7 @@ export default async function TeamDirectoryPage({ searchParams }: { searchParams
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="mgl-table-scroll overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full min-w-[1050px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>{['Nombre', 'Rol', 'Email', 'Teléfono', 'DNI', 'Cargo', 'Estado'].map((heading) => <th key={heading} className="px-4 py-3">{heading}</th>)}</tr>

@@ -29,6 +29,8 @@ const schema = z.object({
   establishment_code: z.string().trim().toUpperCase().regex(/^[0-9A-Z]{4}$/, 'El código de establecimiento debe tener 4 caracteres.'),
   pdf_thank_you_message: z.string().trim().max(300, 'El mensaje de agradecimiento no debe superar 300 caracteres.'),
   pdf_additional_message: z.string().trim().max(500, 'El mensaje adicional no debe superar 500 caracteres.'),
+  invoice_pdf_format: z.enum(['a4', 'a5', 'ticket80', 'ticket58']),
+  receipt_pdf_format: z.enum(['a4', 'a5', 'ticket80', 'ticket58']),
 })
 
 function optionalText(formData: FormData, key: string) {
@@ -67,6 +69,8 @@ export async function saveFiscalSettingsAction(_previous: FormActionState, formD
     establishment_code: formData.get('establishment_code') ?? '0000',
     pdf_thank_you_message: formData.get('pdf_thank_you_message') ?? '',
     pdf_additional_message: formData.get('pdf_additional_message') ?? '',
+    invoice_pdf_format: formData.get('invoice_pdf_format') ?? 'a4',
+    receipt_pdf_format: formData.get('receipt_pdf_format') ?? 'ticket80',
   })
   if (!parsed.success) return { status: 'error', message: parsed.error.issues[0]?.message ?? 'Revisa la configuración fiscal.' }
 
@@ -82,6 +86,34 @@ export async function saveFiscalSettingsAction(_previous: FormActionState, formD
     const admin = fiscalAdminClient()
     const { data: current, error: currentError } = await admin.from('company_fiscal_settings').select('*').eq('company_id', context.company.id).maybeSingle()
     if (currentError && currentError.code !== 'PGRST116') return { status: 'error', message: currentError.message }
+
+    const driveEnabled = formData.get('drive_enabled') === 'on'
+    let driveCloudAccountId: string | null = null
+    if (driveEnabled) {
+      const { data: googleDrive, error: driveError } = await context.supabase
+        .from('cloud_accounts')
+        .select('id')
+        .eq('user_id', context.userId)
+        .eq('provider', 'google')
+        .is('deleted_at', null)
+        .maybeSingle()
+      if (driveError) return { status: 'error', message: driveError.message }
+      if (googleDrive) {
+        driveCloudAccountId = googleDrive.id
+      } else if (current?.drive_cloud_account_id) {
+        const { data: preservedDrive, error: preservedDriveError } = await admin
+          .from('cloud_accounts')
+          .select('id')
+          .eq('id', current.drive_cloud_account_id)
+          .eq('company_id', context.company.id)
+          .eq('provider', 'google')
+          .is('deleted_at', null)
+          .maybeSingle()
+        if (preservedDriveError) return { status: 'error', message: preservedDriveError.message }
+        if (preservedDrive) driveCloudAccountId = preservedDrive.id
+      }
+      if (!driveCloudAccountId) return { status: 'error', message: 'Conecta Google Drive en Configuración → Integraciones antes de activar el archivo fiscal.' }
+    }
 
     const solUser = optionalText(formData, 'sol_user')
     const solPassword = optionalText(formData, 'sol_password')
@@ -164,6 +196,13 @@ export async function saveFiscalSettingsAction(_previous: FormActionState, formD
       pdf_additional_message: parsed.data.pdf_additional_message,
       bank_accounts: bankAccounts,
       digital_wallets: digitalWallets,
+      drive_enabled: driveEnabled,
+      drive_provider: 'google',
+      drive_cloud_account_id: driveCloudAccountId,
+      drive_root_folder_id: current?.drive_root_folder_id ?? 'root',
+      invoice_pdf_format: parsed.data.invoice_pdf_format,
+      receipt_pdf_format: parsed.data.receipt_pdf_format,
+      drive_last_sync_error: driveEnabled ? current?.drive_last_sync_error ?? null : null,
       configured_by: context.userId,
       updated_at: new Date().toISOString(),
       mutation_id: crypto.randomUUID(),
@@ -172,7 +211,7 @@ export async function saveFiscalSettingsAction(_previous: FormActionState, formD
     if (error) return { status: 'error', message: error.message }
     revalidatePath('/app/configuracion/facturacion')
     revalidatePath('/app/invoices')
-    return { status: 'success', message: 'Configuración fiscal y personalización del PDF guardadas correctamente.' }
+    return { status: 'success', message: 'Configuración fiscal, formatos PDF y almacenamiento en Drive guardados correctamente.' }
   } catch (error) {
     return { status: 'error', message: error instanceof Error ? error.message : 'No se pudo guardar la configuración fiscal.' }
   }

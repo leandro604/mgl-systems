@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
+import { fiscalAdminClient } from '@/features/fiscal/server'
 import { requireWorkspaceContext } from '@/features/auth/server'
 import { requireProjectContext } from '@/features/projects/server'
 import { canManageFinance } from '@/features/purchases/server'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeInvoicePdfFormat } from './pdf'
 
 export async function getInvoicesOverview() {
   const supabase = await createClient()
@@ -90,7 +92,8 @@ export async function getInvoiceDetail(projectId: string, invoiceId: string) {
   const invoice = context.invoices.find((item) => item.id === invoiceId)
   if (!invoice) notFound()
 
-  const [itemsResult, totalResult] = await Promise.all([
+  const admin = fiscalAdminClient()
+  const [itemsResult, totalResult, fiscalResult, assetsResult] = await Promise.all([
     context.supabase
       .from('invoice_items')
       .select('id,line_number,description,unit_code,quantity,unit_price,tax_rate,net_amount,tax_amount,deleted_at')
@@ -98,9 +101,39 @@ export async function getInvoiceDetail(projectId: string, invoiceId: string) {
       .is('deleted_at', null)
       .order('line_number'),
     context.supabase.from('invoice_totals').select('*').eq('id', invoiceId).maybeSingle(),
+    admin.from('company_fiscal_settings')
+      .select('drive_enabled,drive_last_sync_error,invoice_pdf_format,receipt_pdf_format')
+      .eq('company_id', context.company.id)
+      .maybeSingle(),
+    admin.from('invoice_cloud_assets')
+      .select('asset_type,pdf_format,file_id,web_url,parent_folder_id,synced_at')
+      .eq('company_id', context.company.id)
+      .eq('invoice_id', invoiceId)
+      .is('deleted_at', null),
   ])
   if (itemsResult.error) throw itemsResult.error
   if (totalResult.error) throw totalResult.error
 
-  return { ...context, invoice, items: itemsResult.data ?? [], total: totalResult.data }
+  const assets = assetsResult.error ? [] : (assetsResult.data ?? [])
+  const assetTypes = new Set(assets.map((asset) => asset.asset_type))
+  const defaultPdfFormat = invoice.document_type === '03'
+    ? normalizeInvoicePdfFormat(fiscalResult.data?.receipt_pdf_format, 'ticket80')
+    : normalizeInvoicePdfFormat(fiscalResult.data?.invoice_pdf_format, 'a4')
+  const hasDefaultPdf = assets.some((asset) => asset.asset_type === 'pdf' && asset.pdf_format === defaultPdfFormat)
+  const driveSynced = hasDefaultPdf && assetTypes.has('xml') && assetTypes.has('cdr')
+  const folderId = assets.find((asset) => asset.parent_folder_id)?.parent_folder_id ?? null
+
+  return {
+    ...context,
+    invoice,
+    items: itemsResult.data ?? [],
+    total: totalResult.data,
+    fiscalPresentation: {
+      defaultPdfFormat,
+      driveEnabled: fiscalResult.error ? false : Boolean(fiscalResult.data?.drive_enabled),
+      driveSynced,
+      driveLastSyncError: fiscalResult.error ? null : fiscalResult.data?.drive_last_sync_error ?? null,
+      driveFolderUrl: folderId ? `https://drive.google.com/drive/folders/${encodeURIComponent(folderId)}` : null,
+    },
+  }
 }

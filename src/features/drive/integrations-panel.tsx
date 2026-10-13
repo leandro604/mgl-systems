@@ -23,7 +23,7 @@ type Props = {
   links: LinkView[]
 }
 
-const selectClass = 'h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800'
+const selectClass = 'h-11 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-800'
 
 function providerLabel(provider: DriveProvider) {
   return provider === 'google' ? 'Google Drive' : 'OneDrive'
@@ -66,7 +66,7 @@ export function IntegrationsPanel({ projects, accounts, links }: Props) {
     execute(bindProjectDriveAction, { provider, project_id: projectId, root_folder_id: folder.id }, 'Carpeta vinculada al proyecto.')
   }
 
-  return <div className="space-y-6">
+  return <div className="space-y-8">
     <div className="grid gap-4 md:grid-cols-2">
       <ProviderCard provider="google" account={accounts.google} pending={pending} onDisconnect={(account) => execute(disconnectCloudAccountAction, { provider: 'google', cloud_account_id: account.id }, 'Google Drive desconectado.')} />
       <ProviderCard provider="microsoft" account={accounts.microsoft} pending={pending} onDisconnect={(account) => execute(disconnectCloudAccountAction, { provider: 'microsoft', cloud_account_id: account.id }, 'OneDrive desconectado.')} />
@@ -74,8 +74,8 @@ export function IntegrationsPanel({ projects, accounts, links }: Props) {
 
     <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-medium text-slate-950">Vincular carpeta a un proyecto</h2>
-        <p className="mt-1 text-sm text-slate-500">Ya no necesitas copiar IDs. Explora tu unidad, selecciona una carpeta y MGL guardará el vínculo.</p>
+        <h2 className="text-lg font-medium tracking-tight text-slate-950">Vincular carpeta a un proyecto</h2>
+        
       </div>
       {connectedProviders.length ? <div className="grid gap-4 lg:grid-cols-[0.8fr_1fr_1.4fr_auto] lg:items-end">
         <div className="space-y-2">
@@ -99,8 +99,8 @@ export function IntegrationsPanel({ projects, accounts, links }: Props) {
 
     <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-medium text-slate-950">Carpetas vinculadas</h2>
-        <p className="mt-1 text-sm text-slate-500">Crea las carpetas de etapas, sincroniza documentos y activa webhooks cuando tengas un dominio HTTPS público.</p>
+        <h2 className="text-lg font-medium tracking-tight text-slate-950">Carpetas vinculadas</h2>
+        
       </div>
       {links.length ? <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
         {links.map((link) => <div key={link.id} className="space-y-4 p-4">
@@ -192,7 +192,7 @@ function FolderPicker({ provider, selected, onSelect }: { provider: DriveProvide
     <Label>Carpeta raíz</Label>
     <Button type="button" variant="secondary" className="h-11 w-full justify-start overflow-hidden" onClick={open}><FolderOpen className="size-4 shrink-0" /><span className="truncate">{selected?.name ?? 'Elegir carpeta…'}</span></Button>
     <dialog ref={dialog} className="m-auto w-[min(44rem,94vw)] rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-950/30">
-      <div className="flex items-center justify-between border-b border-slate-200 p-5"><div><h3 className="font-medium">Seleccionar carpeta</h3><p className="text-xs text-slate-500">{providerLabel(provider)}</p></div><Button type="button" variant="ghost" size="icon" onClick={() => dialog.current?.close()} aria-label="Cerrar"><X className="size-4" /></Button></div>
+      <div className="flex items-center justify-between border-b border-slate-200 p-6"><div><h3 className="text-sm font-medium text-slate-700">Seleccionar carpeta</h3><p className="text-xs text-slate-500">{providerLabel(provider)}</p></div><Button type="button" variant="ghost" size="icon" onClick={() => dialog.current?.close()} aria-label="Cerrar"><X className="size-4" /></Button></div>
       <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 px-5 py-3 text-sm">{stack.map((crumb, index) => <span key={`${crumb.id}-${index}`} className="flex items-center"><button type="button" className="rounded px-1.5 py-1 text-blue-700 hover:bg-blue-50" onClick={() => goTo(index)}>{crumb.name}</button>{index < stack.length - 1 ? <ChevronRight className="size-3 text-slate-400" /> : null}</span>)}</div>
       <div className="max-h-[50vh] min-h-56 overflow-y-auto p-3">
         {loading ? <p className="p-6 text-center text-sm text-slate-500">Cargando carpetas…</p> : error ? <p className="p-6 text-center text-sm text-red-700">{error}</p> : folders.length ? folders.map((item) => <button key={item.id} type="button" onClick={() => enter(item)} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-slate-50"><Folder className="size-5 text-amber-500" /><span className="flex-1 truncate text-sm">{item.name}</span><ChevronRight className="size-4 text-slate-400" /></button>) : <p className="p-6 text-center text-sm text-slate-500">Esta carpeta no contiene subcarpetas.</p>}

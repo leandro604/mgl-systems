@@ -30,10 +30,10 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Descripción</Label>
-        <textarea id="description" name="description" defaultValue={project.description} rows={4} className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15" />
+        <textarea id="description" name="description" defaultValue={project.description} rows={4} className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15" />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-2"><Label htmlFor="status">Estado</Label><select id="status" name="status" defaultValue={project.status} className="h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 text-sm text-slate-100"><option value="planning">Planificación</option><option value="active">Activo</option><option value="on_hold">En pausa</option><option value="completed">Completado</option></select></div>
+        <div className="space-y-2"><Label htmlFor="status">Estado</Label><select id="status" name="status" defaultValue={project.status} className="h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 text-sm text-slate-100"><option value="planning">Planificación</option><option value="active">Activo</option><option value="on_hold">En pausa</option><option value="completed">Completado</option></select></div>
         <div className="space-y-2"><Label htmlFor="starts_on">Inicio</Label><Input id="starts_on" name="starts_on" type="date" defaultValue={project.starts_on ?? ''} /></div>
         <div className="space-y-2"><Label htmlFor="ends_on">Fin</Label><Input id="ends_on" name="ends_on" type="date" defaultValue={project.ends_on ?? ''} /></div>
       </div>

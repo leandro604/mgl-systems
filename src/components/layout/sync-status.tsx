@@ -34,7 +34,7 @@ export function SyncStatus() {
   return (
     <span
       title={resolved === 'error' && lastError ? lastError : lastSyncedAt ? `Última sincronización: ${new Date(lastSyncedAt).toLocaleString()}` : undefined}
-      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${meta.classes}`}
+      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${meta.classes}`}
     >
       <Icon className={`size-3.5 ${meta.spin ? 'animate-spin' : ''}`} strokeWidth={1.5} />
       <span className="hidden sm:inline">{meta.label}</span>

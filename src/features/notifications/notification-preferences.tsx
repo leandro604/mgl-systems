@@ -78,14 +78,14 @@ export function NotificationPreferences({ companyId, model }: { companyId: strin
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600">
           <BellRing className="size-5" strokeWidth={1.5} />
         </div>
         <div>
-          <h2 className="text-lg font-medium text-slate-950">Preferencias</h2>
-          <p className="mt-1 text-sm text-slate-500">In-app siempre queda activo como fuente de verdad.</p>
+          <h2 className="text-lg font-medium tracking-tight text-slate-950">Preferencias</h2>
+          
         </div>
       </div>
 
@@ -124,10 +124,10 @@ export function NotificationPreferences({ companyId, model }: { companyId: strin
           {quietEnabled ? (
             <div className="mt-3 grid grid-cols-2 gap-3 pl-7">
               <label className="text-xs font-medium text-slate-600">Desde
-                <input type="time" value={quietStart} onChange={(event) => setQuietStart(event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-blue-500" />
+                <input type="time" value={quietStart} onChange={(event) => setQuietStart(event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none focus:border-blue-500" />
               </label>
               <label className="text-xs font-medium text-slate-600">Hasta
-                <input type="time" value={quietEnd} onChange={(event) => setQuietEnd(event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-blue-500" />
+                <input type="time" value={quietEnd} onChange={(event) => setQuietEnd(event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none focus:border-blue-500" />
               </label>
             </div>
           ) : null}

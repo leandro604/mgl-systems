@@ -9,7 +9,7 @@ import { initialFormState } from '@/features/auth/types'
 import { activateBudgetAction, addBudgetItemAction, addValuationLineAction, createBudgetAction, createValuationAction, recordProgressAction, transitionValuationAction } from './actions'
 
 const selectClass = 'flex h-11 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
-const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3.5 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
+const textareaClass = 'min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15'
 
 function Message({ state }: { state: typeof initialFormState }) {
   if (!state.message) return null
@@ -43,14 +43,14 @@ export function BudgetItemForm({ projectId, budgetId, groups }: { projectId: str
       <div className="space-y-2"><Label htmlFor="quantity">Metrado</Label><Input id="quantity" name="quantity" type="number" min="0" step="0.0001" defaultValue="1" /></div>
       <div className="space-y-2"><Label htmlFor="unit_price">P.U. sin IGV</Label><Input id="unit_price" name="unit_price" type="number" min="0" step="0.0001" defaultValue="0" /></div>
     </div>
-    <p className="text-xs text-slate-500">Para un grupo/capítulo, MGL fuerza metrado y precio a cero. Los importes de control se manejan sin IGV.</p>
+    
     <SubmitButton pendingLabel="Agregando..."><Plus />Agregar al presupuesto</SubmitButton>
   </form>
 }
 
 export function ActivateBudgetForm({ projectId, budgetId }: { projectId: string; budgetId: string }) {
   const [state, action] = useActionState(activateBudgetAction, initialFormState)
-  return <div className="space-y-3"><Message state={state} /><form action={action}><input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="budget_id" value={budgetId} /><SubmitButton pendingLabel="Fijando línea base..."><CheckCircle2 />Establecer como línea base</SubmitButton></form><p className="text-xs text-amber-300/80">Al activar, esta versión queda congelada y reemplaza la línea base anterior.</p></div>
+  return <div className="space-y-3"><Message state={state} /><form action={action}><input type="hidden" name="project_id" value={projectId} /><input type="hidden" name="budget_id" value={budgetId} /><SubmitButton pendingLabel="Fijando línea base..."><CheckCircle2 />Establecer como línea base</SubmitButton></form></div>
 }
 
 export function ProgressForm({ projectId, items, today }: { projectId: string; items: Array<{ budget_item_id: string | null; code: string | null; description: string | null; unit_code: string | null }>; today: string }) {

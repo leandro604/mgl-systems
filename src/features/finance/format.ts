@@ -21,10 +21,10 @@ export const invoiceStatusLabel: Record<string, string> = {
 }
 
 export function financialStatusClass(status: string) {
-  if (status === 'accepted' || status === 'received') return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-  if (status === 'rejected' || status === 'cancelled' || status === 'voided') return 'border-red-400/20 bg-red-400/10 text-red-200'
-  if (status === 'queued' || status === 'processing' || status === 'submitted' || status === 'issued') return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
-  return 'border-slate-700 bg-slate-900 text-slate-300'
+  if (status === 'accepted' || status === 'received') return 'border-green-200 bg-green-50 text-green-700'
+  if (status === 'rejected' || status === 'cancelled' || status === 'voided') return 'border-red-200 bg-red-50 text-red-700'
+  if (status === 'queued' || status === 'processing' || status === 'submitted' || status === 'issued') return 'border-blue-200 bg-blue-50 text-blue-700'
+  return 'border-slate-200 bg-slate-100 text-slate-600'
 }
 
 
