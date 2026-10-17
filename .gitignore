@@ -7,3 +7,9 @@ supabase/.temp/
 coverage/
 *.log
 *.tsbuildinfo
+
+# Certificados y claves privadas locales
+*.pfx
+*.p12
+*.key
+*.pem
