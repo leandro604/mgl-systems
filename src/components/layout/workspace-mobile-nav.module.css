@@ -1,0 +1,32 @@
+/* Keep the title visible and give the menu its own touch scroll area. */
+.panel[open] {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.panel > div:first-child {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.panel > div:last-child {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+@media (min-width: 1024px) {
+  .panel[open] {
+    display: none;
+  }
+}
