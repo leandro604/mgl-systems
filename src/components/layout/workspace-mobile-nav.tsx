@@ -17,10 +17,10 @@ import {
   ShoppingCart,
   UsersRound,
   Warehouse,
-  X,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Drawer } from '@/components/ui/drawer'
 import type { AppRole } from '@/features/auth/roles'
 
 type Item = { href: string; label: string; icon: LucideIcon; roles?: readonly AppRole[] }
@@ -54,10 +54,15 @@ export function WorkspaceMobileNav({ role }: { role: AppRole }) {
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const close = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false)
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const onBreakpointChange = () => { if (desktop.matches) setOpen(false) }
+    onBreakpointChange()
+    desktop.addEventListener('change', onBreakpointChange)
     window.addEventListener('keydown', close)
     return () => {
       document.body.style.overflow = overflow
       window.removeEventListener('keydown', close)
+      desktop.removeEventListener('change', onBreakpointChange)
     }
   }, [open])
 
@@ -68,46 +73,37 @@ export function WorkspaceMobileNav({ role }: { role: AppRole }) {
         onClick={() => setOpen(true)}
         className="grid size-10 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 lg:hidden"
         aria-label="Abrir menú"
+        aria-haspopup="dialog"
         aria-expanded={open}
       >
         <Menu className="size-5" strokeWidth={1.5} />
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-[90] bg-slate-950/35 lg:hidden" onMouseDown={(event) => event.target === event.currentTarget && setOpen(false)}>
-          <aside className="ml-auto flex h-full w-[min(22rem,92vw)] flex-col bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label="Navegación de MGL Systems">
-            <div className="flex min-h-16 items-center justify-between border-b border-slate-200 px-4">
-              <div>
-                <p className="text-sm font-semibold text-slate-950">MGL Systems</p>
-                <p className="text-xs text-slate-500">Menú de gestión</p>
-              </div>
-              <button type="button" onClick={() => setOpen(false)} className="grid size-10 place-items-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar menú">
-                <X className="size-5" />
-              </button>
-            </div>
-            <nav className="min-h-0 flex-1 overflow-y-auto p-3">
-              <div className="grid gap-1 sm:grid-cols-2">
-                {visible.map(({ href, label, icon: Icon }) => {
-                  const active = href === '/app/dashboard' ? pathname === href || pathname === '/app' : href === '/app/proyectos' ? pathname.startsWith('/app/proyectos') || pathname.startsWith('/app/projects') : pathname.startsWith(href)
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
-                        active ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50',
-                      )}
-                    >
-                      <Icon className="size-4 shrink-0" strokeWidth={1.5} />
-                      <span>{label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </nav>
-          </aside>
-        </div>
-      ) : null}
+      <Drawer open={open} onOpenChange={setOpen} title="MGL Systems" className="w-[min(22rem,92vw)] max-w-none overscroll-contain lg:hidden [&>div:first-child]:px-4 [&>div:last-child]:p-3">
+        <nav aria-label="Menú de gestión">
+          <p className="px-3 pb-3 pt-1 text-xs font-medium text-slate-500">Menú de gestión</p>
+          <div className="grid gap-1">
+            {visible.map(({ href, label, icon: Icon }) => {
+              const active = href === '/app/dashboard' ? pathname === href || pathname === '/app' : href === '/app/proyectos' ? pathname.startsWith('/app/proyectos') || pathname.startsWith('/app/projects') : pathname.startsWith(href)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
+                    active ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50',
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" strokeWidth={1.5} />
+                  <span>{label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
+      </Drawer>
     </>
   )
 }
