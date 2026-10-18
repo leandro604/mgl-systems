@@ -1,0 +1,44 @@
+.layout {
+  min-height: 100dvh;
+  background: #f8fbff;
+  color: #0f172a;
+}
+.presentation {
+  padding: 24px;
+  background: radial-gradient(ellipse at 5% 15%, #e6f5ff 0, transparent 55%), #f8fbff;
+}
+.logo { display: inline-flex; align-self: flex-start; width: max-content; }
+.logo img { width: 160px; }
+.introduction { max-width: 720px; margin-top: 24px; }
+.eyebrow { color: #036985; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.headline { margin-top: 18px; color: #0b172e; font-size: clamp(2.2rem, 5vw, 4.75rem); font-weight: 850; line-height: 1.06; letter-spacing: -.045em; text-wrap: balance; }
+.description { margin-top: 22px; color: #475569; font-size: 16px; line-height: 1.7; max-width: 610px; }
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
+.featureCard { min-width: 0; padding: 18px; background: #fff; border: 1px solid #d5e4f3; border-radius: 16px; box-shadow: 0 3px 12px #143e6e05; }
+.featureIcon { display: inline-flex; padding: 9px; border-radius: 10px; color: #0369a1; background: #eaf5ff; margin-bottom: 12px; }
+.featureCard h3 { color: #13243b; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.featureCard p { margin-top: 6px; color: #475569; font-size: 12px; line-height: 1.65; }
+.formArea { display: flex; align-items: center; justify-content: center; padding: 32px 24px 48px; background: #fff; border-top: 1px solid #dce7f2; }
+.formCard { width: 100%; max-width: 420px; }
+.formCard h1 { margin-bottom: 28px; }
+.formCard a { color: #1d4ed8; }
+.formCard a:hover { color: #1e40af; }
+@media (min-width: 768px) {
+  .presentation { padding: 40px; }
+  .logo img { width: 200px; }
+  .description { font-size: 18px; }
+  .featureCard { padding: 22px; }
+  .featureCard p { font-size: 14px; }
+  .features { gap: 16px; margin-top: 32px; }
+}
+@media (min-width: 1024px) {
+  .layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+  .presentation { display: flex; flex-direction: column; justify-content: center; min-height: 100dvh; padding: 40px clamp(32px, 4vw, 72px); }
+  .introduction { margin-top: 28px; }
+  .formArea { min-height: 100dvh; padding: 48px 40px; border-top: 0; border-left: 1px solid #dce7f2; }
+}
+@media (max-width: 374px) {
+  .presentation { padding: 20px; }
+  .featureCard { padding: 14px; }
+  .features { gap: 10px; }
+}

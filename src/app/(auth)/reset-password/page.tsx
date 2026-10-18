@@ -9,8 +9,8 @@ export default async function ResetPasswordPage() {
   if (!userId) redirect('/forgot-password')
   return (
     <section>
-      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Seguridad</span>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Define una nueva contraseña</h1>
+      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">Seguridad</span>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">Define una nueva contraseña</h1>
       <ResetPasswordForm />
     </section>
   )

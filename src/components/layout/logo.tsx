@@ -1,18 +1,11 @@
 import Link from 'next/link'
-import { Boxes } from 'lucide-react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
-export function Logo({ compact = false, className }: { compact?: boolean; className?: string }) {
+export function Logo({ compact = false, className, priority = false }: { compact?: boolean; className?: string; priority?: boolean }) {
   return (
-    <Link href="/" className={cn('inline-flex items-center gap-3 text-slate-100', className)}>
-      <span className="grid size-10 place-items-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
-        <Boxes className="size-5" />
-      </span>
-      {!compact ? (
-        <span className="leading-tight">
-          <span className="block text-sm font-black tracking-[0.18em]">MGL SYSTEMS</span>
-        </span>
-      ) : null}
+    <Link href="/" aria-label="MGL Systems · Inicio" className={cn('inline-flex shrink-0 items-center rounded-xl bg-white', className)}>
+      <Image src="/mgl-systems-logo.png" alt="MGL Systems" width={1448} height={1086} priority={priority} sizes={compact ? '56px' : '(min-width: 1024px) 200px, 160px'} className={cn('h-auto rounded-xl object-contain', compact ? 'w-14' : 'w-40 lg:w-[200px]')} />
     </Link>
   )
 }

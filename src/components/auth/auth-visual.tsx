@@ -1,46 +1,32 @@
-'use client'
-
-import { motion } from 'framer-motion'
 import { Building2, CloudCog, ShieldCheck, WifiOff } from 'lucide-react'
 import { Logo } from '@/components/layout/logo'
+import styles from './auth-visual.module.css'
 
 const items = [
-  { icon: Building2, title: 'Proyectos centralizados' },
-  { icon: WifiOff, title: 'Trabajo local-first' },
-  { icon: CloudCog, title: 'Sincronización segura' },
-  { icon: ShieldCheck, title: 'Permisos por rol' },
+  { icon: Building2, title: 'Proyectos centralizados', description: 'Etapas, tareas y documentación en un solo workspace.' },
+  { icon: WifiOff, title: 'Trabajo local-first', description: 'Continúa operando incluso cuando la conectividad de obra falla.' },
+  { icon: CloudCog, title: 'Sincronización segura', description: 'Mantén los cambios de tu equipo conectados entre campo y oficina.' },
+  { icon: ShieldCheck, title: 'Permisos por rol', description: 'Cada persona accede a las herramientas que necesita para su trabajo.' },
 ]
 
 export function AuthVisual() {
   return (
-    <div className="relative hidden min-h-screen overflow-hidden border-r border-slate-800 bg-slate-950 p-10 lg:flex lg:flex-col">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,.13),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(59,130,246,.1),transparent_32%)]" />
-      <div className="relative z-10"><Logo /></div>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="relative z-10 my-auto max-w-xl"
-      >
-        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">Gestión de obra conectada</span>
-        <h1 className="mt-5 text-2xl font-semibold leading-[1.04] tracking-tight text-white xl:text-2xl">
-          Del campo al control, sin perder información.
-        </h1>
-        <div className="mt-10 grid gap-3 sm:grid-cols-2">
-          {items.map(({ icon: Icon, title }, index) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 * index + 0.15 }}
-              className="rounded-2xl border border-slate-800 bg-slate-900/45 p-4 backdrop-blur"
-            >
-              <Icon className="mb-3 size-5 text-cyan-300" />
-              <div className="text-sm font-semibold text-slate-100">{title}</div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-    </div>
+    <section className={styles.presentation} aria-label="Conoce MGL Systems">
+      <Logo priority className={styles.logo ?? ''} />
+      <div className={styles.introduction}>
+        <p className={styles.eyebrow}>Gestión de obra conectada</p>
+        <h2 className={styles.headline}>Del campo al control, sin perder información.</h2>
+        <p className={styles.description}>MGL Systems combina operación local, sincronización confiable y control por proyecto para equipos de construcción.</p>
+      </div>
+      <div className={styles.features}>
+        {items.map(({ icon: Icon, title, description }) => (
+          <article key={title} className={styles.featureCard}>
+            <span className={styles.featureIcon}><Icon size={22} strokeWidth={1.75} aria-hidden="true" /></span>
+            <h3>{title}</h3>
+            <p>{description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   )
 }
