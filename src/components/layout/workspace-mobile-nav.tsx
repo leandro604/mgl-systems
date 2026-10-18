@@ -80,7 +80,7 @@ export function WorkspaceMobileNav({ role }: { role: AppRole }) {
         <Menu className="size-5" strokeWidth={1.5} />
       </button>
 
-      <Drawer open={open} onOpenChange={setOpen} title="MGL Systems" className={cn(styles.panel, 'w-[min(22rem,92vw)] max-w-none lg:hidden [&>div:first-child]:px-4 [&>div:last-child]:p-3')}>
+      <Drawer open={open} onOpenChange={setOpen} title="MGL Systems" className={cn(styles.panel)}>
         <nav aria-label="Menú de gestión">
           <p className="px-3 pb-3 pt-1 text-xs font-medium text-slate-500">Menú de gestión</p>
           <div className="grid gap-1">
