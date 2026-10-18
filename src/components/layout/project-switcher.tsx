@@ -1,7 +1,10 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { FolderKanban } from 'lucide-react'
+import { Check, ChevronDown, FolderKanban } from 'lucide-react'
+import { useEffect, useId, useRef, useState } from 'react'
+import Link from 'next/link'
+import styles from './project-switcher.module.css'
 import { cn } from '@/lib/utils'
 
 type Project = { id: string; code: string; name: string }
@@ -18,6 +21,32 @@ export function ProjectSwitcher({
   const router = useRouter()
   const pathname = usePathname()
   const current = projects.find((project) => pathname.includes(project.id))?.id ?? ''
+  const selected = projects.find((project) => project.id === current)
+  const popoverId = useId()
+  const trigger = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+
+  function positionPanel() {
+    const rect = trigger.current?.getBoundingClientRect()
+    if (!rect || !panel.current) return
+    const width = Math.min(Math.max(rect.width, 320), 420, window.innerWidth - 24)
+    panel.current.style.width = `${width}px`
+    panel.current.style.left = `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`
+    panel.current.style.top = `${rect.bottom + 6}px`
+    panel.current.style.maxHeight = `${Math.max(80, window.innerHeight - rect.bottom - 18)}px`
+  }
+
+  useEffect(() => { panel.current?.hidePopover() }, [pathname])
+  useEffect(() => {
+    if (!open) return
+    window.addEventListener('resize', positionPanel)
+    window.addEventListener('scroll', positionPanel, true)
+    return () => {
+      window.removeEventListener('resize', positionPanel)
+      window.removeEventListener('scroll', positionPanel, true)
+    }
+  }, [open])
 
   if (projects.length === 0) {
     return (
@@ -37,17 +66,41 @@ export function ProjectSwitcher({
   }
 
   return (
-    <label className={cn('relative block min-w-0', mobile ? 'w-full' : 'w-full max-w-[15rem]', className)}>
-      <span className="sr-only">Seleccionar proyecto</span>
-      <FolderKanban className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
-      <select
-        value={current}
-        onChange={(event) => event.target.value ? router.push(`/app/projects/${event.target.value}`) : router.push('/app')}
-        className="h-10 w-full min-w-0 appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-8 text-sm text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-600/15"
-      >
-        <option value="">Todos los proyectos</option>
-        {projects.map((project) => <option key={project.id} value={project.id}>{project.code} · {project.name}</option>)}
-      </select>
-    </label>
+    <div className={cn('min-w-0', mobile ? 'w-full' : 'w-full max-w-[15rem]', className)}>
+      <button ref={trigger} type="button" popoverTarget={popoverId} aria-expanded={open} aria-controls={popoverId}
+        aria-label={`Seleccionar proyecto: ${selected?.name ?? 'Todos los proyectos'}`}
+        onClick={positionPanel} className={styles.trigger}>
+        <FolderKanban size={18} aria-hidden="true" />
+        <span className={styles.selection}>
+          {selected && <small>{selected.code}</small>}
+          <span title={selected?.name}>{selected?.name ?? 'Todos los proyectos'}</span>
+        </span>
+        <ChevronDown size={16} aria-hidden="true" />
+      </button>
+      <div ref={panel} id={popoverId} popover="auto" className={styles.panel}
+        onToggle={(event) => setOpen(event.newState === 'open')}>
+        <nav aria-label="Seleccionar proyecto" onKeyDown={(event) => {
+          const links = Array.from(event.currentTarget.querySelectorAll('a'))
+          const index = links.indexOf(document.activeElement as HTMLAnchorElement)
+          let next: number
+          if (event.key === 'ArrowDown') next = (index + 1) % links.length
+          else if (event.key === 'ArrowUp') next = (index - 1 + links.length) % links.length
+          else if (event.key === 'Home') next = 0
+          else if (event.key === 'End') next = links.length - 1
+          else return
+          event.preventDefault()
+          links[next]?.focus()
+        }}>
+          {[{ id: '', code: '', name: 'Todos los proyectos' }, ...projects].map((project) => (
+            <Link key={project.id} href={project.id ? `/app/projects/${project.id}` : '/app'}
+              aria-current={current === project.id ? 'page' : undefined}
+              className={styles.option} onClick={() => panel.current?.hidePopover()}>
+              <span>{project.code && <small>{project.code}</small>}{project.name}</span>
+              {current === project.id && <Check size={18} aria-hidden="true" />}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </div>
   )
 }

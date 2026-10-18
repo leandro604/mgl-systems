@@ -1,0 +1,12 @@
+.trigger { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; min-height: 48px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; background: #fff; color: #0f172a; text-align: left; cursor: pointer; }
+.trigger > svg { flex-shrink: 0; color: #2563eb; }
+.selection { flex: 1; min-width: 0; display: grid; font-size: 14px; line-height: 20px; }
+.selection > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selection small, .option small { display: block; color: #64748b; font-size: 11px; line-height: 16px; }
+.panel { position: fixed; inset: auto; margin: 0; padding: 6px; border: 1px solid #dbe3ef; border-radius: 14px; background: white; color: #0f172a; box-shadow: 0 12px 36px #0f172a26; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; }
+.option { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; min-height: 44px; border-radius: 9px; color: #0f172a; font-size: 14px; line-height: 21px; text-decoration: none; }
+.option > span { min-width: 0; overflow-wrap: anywhere; }
+.option > svg { flex-shrink: 0; }
+.option[aria-current='page'] { background: #eff6ff; color: #1d4ed8; }
+.option:hover { background: #f1f5f9; }
+.trigger:focus-visible, .option:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
