@@ -98,7 +98,10 @@ export function useNotifications(companyId: string, userId: string) {
           setReady(true)
         },
         error: () => {
-          if (!disposed) setReady(true)
+          if (!disposed) {
+            setReady(true)
+            setError('No se pudo leer la lista local de notificaciones.')
+          }
         },
       })
 

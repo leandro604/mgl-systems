@@ -1,25 +1,33 @@
 'use client'
 
 import { Bell } from 'lucide-react'
+import type { Ref } from 'react'
 import { cn } from '@/lib/utils'
 
 export interface NotificationBellProps {
   unreadCount?: number
   onClick?: () => void
   className?: string
+  buttonRef?: Ref<HTMLButtonElement>
+  expanded?: boolean
+  controls?: string | undefined
 }
 
 /**
  * Presentational notification entry point.
  * Tarea 9: entry point del centro Realtime/local-first de notificaciones.
  */
-export function NotificationBell({ unreadCount = 0, onClick, className }: NotificationBellProps) {
+export function NotificationBell({ unreadCount = 0, onClick, className, buttonRef, expanded, controls }: NotificationBellProps) {
   const safeCount = Math.max(0, Math.floor(unreadCount))
   const label = safeCount > 0 ? `Notificaciones, ${safeCount} sin leer` : 'Notificaciones'
 
   return (
     <button
+      ref={buttonRef}
       type="button"
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
+      aria-controls={controls}
       onClick={onClick}
       aria-label={label}
       title={label}

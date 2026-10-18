@@ -11,11 +11,13 @@ export function NotificationList({
   onSetRead,
   emptyMessage = 'Sin notificaciones',
   compact = false,
+  onOpen,
 }: {
   rows: LocalNotification[]
   onSetRead: (id: string, read: boolean) => Promise<void>
   emptyMessage?: string
   compact?: boolean
+  onOpen?: () => void
 }) {
   const router = useRouter()
 
@@ -26,7 +28,10 @@ export function NotificationList({
   async function open(row: LocalNotification) {
     if (!row.read_at) await onSetRead(row.id, true)
     const href = notificationActionUrl(row)
-    if (href) router.push(href)
+    if (href) {
+      router.push(href)
+      onOpen?.()
+    }
   }
 
   return <div className="divide-y divide-slate-100">
@@ -34,9 +39,13 @@ export function NotificationList({
       const unread = !row.read_at
       return <button key={row.id} type="button" onClick={() => void open(row)} className={cn('flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 sm:px-5', compact && 'px-3 sm:px-4')}>
         <span className={cn('size-2 shrink-0 rounded-full', unread ? 'bg-blue-600' : 'bg-slate-200')} />
-        <span className={cn('min-w-0 flex-1 truncate text-sm text-slate-900', unread ? 'font-medium' : 'font-normal')}>{row.title}</span>
+        <span className="min-w-0 flex-1">
+          <span className={cn('block text-sm text-slate-900', compact ? 'line-clamp-2' : 'truncate', unread ? 'font-semibold' : 'font-normal')}>{row.title}</span>
+          {compact && row.body ? <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-500">{row.body}</span> : null}
+          {compact ? <span className="mt-1 block text-[11px] text-slate-400">{formatNotificationTime(row.created_at)}</span> : null}
+        </span>
         {row.pending_sync ? <WifiOff className="size-3 shrink-0 text-amber-600" /> : null}
-        <span className="shrink-0 text-xs text-slate-400">{formatNotificationTime(row.created_at)}</span>
+        {!compact ? <span className="shrink-0 text-xs text-slate-400">{formatNotificationTime(row.created_at)}</span> : null}
       </button>
     })}
   </div>

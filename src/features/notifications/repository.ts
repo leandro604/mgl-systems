@@ -92,7 +92,6 @@ export async function hydrateNotifications(
   ])
 
   if (notifications.error) throw notifications.error
-  if (preferences.error) throw preferences.error
 
   await db.transaction('rw', db.notifications, db.userPreferences, async () => {
     const remoteRows = notifications.data ?? []
@@ -120,6 +119,9 @@ export async function hydrateNotifications(
       if (!local?.pending_sync) await db.userPreferences.put(toLocalPreference(preferences.data))
     }
   })
+
+  // A preference failure must not hide notifications fetched successfully.
+  if (preferences.error) throw preferences.error
 }
 
 export async function mergeRealtimeNotification(db: MglLocalDb, row: NotificationRow): Promise<void> {
