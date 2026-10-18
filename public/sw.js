@@ -1,6 +1,6 @@
 /* MGL Systems service worker — static shell + Web Push. Never caches authenticated HTML, Auth/API or private JSON. */
-const CACHE = 'mgl-shell-v9'
-const SHELL = ['/manifest.webmanifest', '/offline.html']
+const CACHE = 'mgl-shell-v10'
+const SHELL = ['/manifest.webmanifest', '/offline.html', '/icons/mgl-192.png', '/icons/mgl-512.png', '/icons/mgl-maskable-512.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()))
