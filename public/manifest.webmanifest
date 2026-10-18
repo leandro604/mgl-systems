@@ -5,5 +5,13 @@
   "display": "standalone",
   "background_color": "#08111d",
   "theme_color": "#08111d",
-  "description": "Gestión de proyectos de construcción con arquitectura local-first"
+  "description": "Gestión de proyectos de construcción con arquitectura local-first",
+  "icons": [
+    {
+      "src": "/mgl-symbol.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
