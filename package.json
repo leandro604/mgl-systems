@@ -15,8 +15,9 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:schema": "node tests/schema.test.mjs",
-    "verify": "npm run typecheck && npm run test && npm run test:documents && npm run test:schema && npm run build",
+    "verify": "npm run typecheck && npm run test && npm run test:documents && npm run test:schema && npm run test:notification-context && npm run build",
     "test:documents": "node tests/task7-schema.test.mjs",
+    "test:notification-context": "node tests/notification-context.test.mjs",
     "test:search": "vitest run src/features/search/global-search.test.ts",
     "test:notifications": "vitest run tests/unit/notifications.test.ts",
     "test:material-requests": "vitest run src/features/material-requests/material-request-sync.test.ts"
