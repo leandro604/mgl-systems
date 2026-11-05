@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ClipboardCheck, FileText, FolderKanban, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, ClipboardCheck, FileText, FolderKanban, ShieldCheck } from 'lucide-react'
 import { requireWorkspaceContext } from '@/features/auth/server'
 import { canAccessFinancialModules } from '@/features/auth/roles'
 import { ManagementDashboard } from '@/features/dashboard/management-dashboard'
@@ -25,7 +25,10 @@ export default async function DashboardPage() {
     ['Documentos', counts[1]?.count ?? 0, FileText], ['SST', counts[2]?.count ?? 0, ShieldCheck],
   ] as const
   return <div className={`${styles.dashboard} mx-auto max-w-7xl`}>
-    <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+    <div className={styles.welcome}>
+      <div><span className={styles.eyebrow}>VISTA GENERAL · MGL SYSTEMS</span><h1>Hola, {profile.full_name?.trim().split(/\s+/)[0] || 'bienvenido'}<span className={styles.greetingDot}>.</span></h1><p>Así avanzan tus obras.</p></div>
+      <div className={styles.quickActions}><Link href="/app/tasks">Mis tareas <ClipboardCheck size={16} /></Link><Link href="/app/proyectos" className={styles.primaryAction}>Ver proyectos <ArrowUpRight size={17} /></Link></div>
+    </div>
     {data ? <ManagementDashboard data={data} currency={company.currency} portfolio /> : <section className={styles.kpis} aria-label="Resumen operativo">
       {operational.map(([label, value, Icon]) => <article key={label} className={`${styles.kpi} ${styles.surface} p-6`}><h2 className={styles.kpiTitle}>{label}</h2><span className={styles.icon}><Icon size={20} aria-hidden="true" /></span><p className={styles.kpiValue}>{value}</p></article>)}
     </section>}

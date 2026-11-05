@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { formatMoney } from '@/features/finance/format'
 import { DashboardKpis } from './dashboard-kpis'
+import { DashboardOverview } from './dashboard-overview'
 import { CostDonut, SCurveChart } from './charts'
 import type { DashboardData } from './model'
 import styles from './dashboard.module.css'
@@ -8,6 +9,7 @@ import styles from './dashboard.module.css'
 export function ManagementDashboard({ data, currency, portfolio = false }: { data: DashboardData; currency: string; portfolio?: boolean }) {
   return <div className={styles.dashboard}>
     <DashboardKpis data={data} currency={currency} />
+    <DashboardOverview data={data} portfolio={portfolio} />
     <section aria-label="Gráficos de avance y costos" className={styles.charts}>
       <section className={styles.surface} aria-labelledby="s-curve-heading">
         <div className={styles.chartHeader}><h2 id="s-curve-heading" className={styles.heading}>Curva S</h2><div className={styles.legend}><span><i aria-hidden="true" />Plan</span><span><i aria-hidden="true" />Ejecutado</span></div></div>
