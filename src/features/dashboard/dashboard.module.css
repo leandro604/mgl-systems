@@ -1,0 +1,63 @@
+.dashboard { min-width: 0; width: 100%; color: #0f172a; }
+.dashboard > * + * { margin-top: 24px; }
+.kpis { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.kpi { min-width: 0; position: relative; }
+.kpiTitle { padding-right: 48px; min-height: 40px; color: #64748b; font-size: 14px; font-weight: 500; line-height: 20px; }
+.kpiValue { margin: 16px 0 0; color: #0f172a; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.035em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.icon { position: absolute; top: 24px; right: 24px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #475569; }
+.progress { height: 5px; margin-top: 18px; overflow: hidden; border-radius: 99px; background: #e2e8f0; }
+.progress > span { display: block; height: 100%; border-radius: inherit; background: #2563eb; }
+.charts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.surface { min-width: 0; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px #0f172a08; }
+.heading { margin: 0; color: #0f172a; font-size: 16px; font-weight: 600; line-height: 24px; }
+.chartHeader { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 24px 8px; }
+.legend { display: flex; gap: 16px; color: #334155; font-size: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 18px; border-top: 2px solid #2563eb; }
+.legend span:last-child i { border-color: #059669; border-top-style: dashed; }
+.curve { height: 280px; min-width: 0; padding: 12px 12px 12px 4px; background: #fff; border-radius: 12px; }
+.chartEmpty { display: grid; place-items: center; min-height: 250px; padding: 24px; color: #475569; font-size: 14px; text-align: center; }
+.donut { height: 198px; min-width: 0; }
+.costLegend { display: grid; gap: 12px; margin: 0; padding: 0 24px 24px; }
+.costLegend > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; line-height: 18px; }
+.costLegend dt { display: flex; align-items: center; gap: 8px; color: #334155; }
+.costLegend dd { margin: 0; color: #0f172a; font-weight: 600; font-variant-numeric: tabular-nums; }
+.costLegend i { width: 8px; height: 8px; border-radius: 50%; }
+.tableHeader { padding: 24px; }
+.tableScroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 0 0 12px 12px; }
+.tableScroll:focus-visible { outline: 2px solid #2563eb; outline-offset: -2px; }
+.table { width: 100%; min-width: 740px; border-collapse: collapse; background: #fff; }
+.table thead { background: #fff; }
+.dashboard .table th { padding: 12px 24px; color: #64748b; font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid #f1f5f9; }
+.dashboard .table td { padding: 18px 24px; color: #1e293b; font-size: 13px; line-height: 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.table th:not(:first-child), .table td:not(:first-child) { white-space: nowrap; }
+.table th:first-child, .table td:first-child { min-width: 250px; max-width: 360px; text-align: left; }
+.table td:first-child a { display: block; color: #0f172a; font-weight: 600; overflow-wrap: anywhere; }
+.table td:first-child small { display: block; margin-top: 4px; color: #475569; font-size: 12px; }
+.table tbody tr:hover { background: #f8fafc; }
+.number { text-align: right; font-variant-numeric: tabular-nums; }
+.dashboard .negative { color: #dc2626; }
+.dashboard .table td.negative { color: #dc2626; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.critical { color: #b91c1c; background: #fef2f2; }
+.warning { color: #b45309; background: #fffbeb; }
+.normal { color: #047857; background: #ecfdf5; }
+.details { padding: 20px 24px; }
+.details > summary { cursor: pointer; color: #1e293b; font-size: 14px; font-weight: 600; }
+.details[open] > summary { margin-bottom: 20px; }
+@media (min-width: 1280px) {
+  .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .charts { grid-template-columns: minmax(0, 7fr) minmax(280px, 3fr); }
+}
+@media (min-width: 640px) and (max-width: 1279px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .dashboard > * + * { margin-top: 16px; }
+  .chartHeader, .tableHeader { padding: 20px 20px 12px; }
+  .chartHeader { align-items: flex-start; }
+  .curve { height: 250px; }
+  .costLegend { padding-inline: 20px; }
+  .heading { font-size: 15px; }
+}

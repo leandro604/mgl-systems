@@ -1,8 +1,38 @@
 import Link from 'next/link'
 import { ClipboardCheck, FileText, FolderKanban, ShieldCheck } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { requireWorkspaceContext } from '@/features/auth/server'
+import { canAccessFinancialModules } from '@/features/auth/roles'
+import { ManagementDashboard } from '@/features/dashboard/management-dashboard'
+import { getPortfolioDashboard } from '@/features/dashboard/server'
+import styles from '@/features/dashboard/dashboard.module.css'
 
-export const dynamic='force-dynamic'
+export const dynamic = 'force-dynamic'
 
-export default async function DashboardPage(){const ctx=await requireWorkspaceContext();const {supabase,projects}=ctx;const ids=projects.map((p)=>p.id);const [tasks,docs,sst,recent]=ids.length?await Promise.all([supabase.from('tasks').select('id',{count:'exact',head:true}).in('project_id',ids).is('deleted_at',null).neq('status','done'),supabase.from('documents').select('id',{count:'exact',head:true}).in('project_id',ids).is('deleted_at',null),supabase.from('sst_records').select('id',{count:'exact',head:true}).in('project_id',ids).is('deleted_at',null),supabase.from('tasks').select('id,title,status,progress,project_id').in('project_id',ids).is('deleted_at',null).order('updated_at',{ascending:false}).limit(6)]):[{count:0,error:null},{count:0,error:null},{count:0,error:null},{data:[],error:null}];for(const r of[tasks,docs,sst,recent])if(r.error)throw r.error;const names=new Map(projects.map((p)=>[p.id,p.name]));const metrics=[['Proyectos',projects.length,FolderKanban],['Tareas abiertas',tasks.count??0,ClipboardCheck],['Documentos',docs.count??0,FileText],['SST',sst.count??0,ShieldCheck]] as const;return <div className="mx-auto max-w-7xl space-y-8"><h1 className="text-2xl font-semibold tracking-tight text-slate-950">Dashboard</h1><section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{metrics.map(([label,value,Icon])=><Card key={label}><CardContent className="flex items-center justify-between p-6"><div><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold text-slate-950">{value}</p></div><Icon className="size-5 text-blue-600" strokeWidth={1.5}/></CardContent></Card>)}</section><div className="grid gap-8 xl:grid-cols-2"><Card><CardHeader><CardTitle>Proyectos</CardTitle></CardHeader><CardContent className="divide-y divide-slate-100">{projects.slice(0,6).map((p)=><Link key={p.id} href={`/app/proyectos/${p.id}/dashboard`} className="flex items-center justify-between py-3 text-sm"><span className="font-medium">{p.name}</span><span className="text-slate-400">{p.code}</span></Link>)}{!projects.length?<p className="py-6 text-center text-sm text-slate-500">Sin datos</p>:null}</CardContent></Card><Card><CardHeader><CardTitle>Actividad reciente</CardTitle></CardHeader><CardContent className="divide-y divide-slate-100">{(recent.data??[]).map((t)=><div key={t.id} className="py-3 text-sm"><div className="flex justify-between gap-3"><span className="font-medium">{t.title}</span><span className="text-blue-700">{t.progress}%</span></div><p className="mt-1 text-xs text-slate-400">{names.get(t.project_id)} · {t.status.replace('_',' ')}</p></div>)}{!(recent.data??[]).length?<p className="py-6 text-center text-sm text-slate-500">Sin datos</p>:null}</CardContent></Card></div></div>}
+export default async function DashboardPage() {
+  const context = await requireWorkspaceContext()
+  const { supabase, projects, profile, company } = context
+  const financial = canAccessFinancialModules(profile.role)
+  const ids = projects.map((project) => project.id)
+  const data = financial ? await getPortfolioDashboard(projects) : null
+  const counts = !financial && ids.length ? await Promise.all([
+    supabase.from('tasks').select('id', { count: 'exact', head: true }).in('project_id', ids).is('deleted_at', null).neq('status', 'done'),
+    supabase.from('documents').select('id', { count: 'exact', head: true }).in('project_id', ids).is('deleted_at', null),
+    supabase.from('sst_records').select('id', { count: 'exact', head: true }).in('project_id', ids).is('deleted_at', null),
+  ]) : []
+  for (const result of counts) if (result.error) throw result.error
+  const operational = [
+    ['Proyectos', projects.length, FolderKanban], ['Tareas abiertas', counts[0]?.count ?? 0, ClipboardCheck],
+    ['Documentos', counts[1]?.count ?? 0, FileText], ['SST', counts[2]?.count ?? 0, ShieldCheck],
+  ] as const
+  return <div className={`${styles.dashboard} mx-auto max-w-7xl`}>
+    <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+    {data ? <ManagementDashboard data={data} currency={company.currency} portfolio /> : <section className={styles.kpis} aria-label="Resumen operativo">
+      {operational.map(([label, value, Icon]) => <article key={label} className={`${styles.kpi} ${styles.surface} p-6`}><h2 className={styles.kpiTitle}>{label}</h2><span className={styles.icon}><Icon size={20} aria-hidden="true" /></span><p className={styles.kpiValue}>{value}</p></article>)}
+    </section>}
+    <details className={`${styles.surface} ${styles.details}`} open={!financial}>
+      <summary>Proyectos · {projects.length}</summary>
+      <div className="divide-y divide-slate-100">{projects.map((project) => <Link key={project.id} href={`/app/proyectos/${project.id}/dashboard`} className="flex flex-wrap items-center justify-between gap-2 py-4 text-sm text-slate-900 hover:bg-slate-50"><span className="min-w-0 font-medium [overflow-wrap:anywhere]">{project.name}</span><span className="text-slate-800">{project.code}</span></Link>)}</div>
+      {!projects.length && <p className="py-4 text-sm text-slate-800">Sin proyectos</p>}
+    </details>
+  </div>
+}
